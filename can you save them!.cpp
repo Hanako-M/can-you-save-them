@@ -27,6 +27,7 @@ struct Button {
 };
 
 int main() {
+    cout<<"hello"
     // Create the game window
     RenderWindow window(VideoMode(1500, 800), "SFML Window");
 
