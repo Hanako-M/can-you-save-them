@@ -27,7 +27,7 @@ struct Button {
 };
 
 int main() {
-    cout<<"hello"
+    cout << "hello";
     // Create the game window
     RenderWindow window(VideoMode(1500, 800), "SFML Window");
 
@@ -53,14 +53,21 @@ int main() {
     // Create a text object
     Text titleText;
     titleText.setFont(font);
-    titleText.setString("CAN YOU SAVE THEM");
-    titleText.setCharacterSize(120);
+    titleText.setString("CAN YOU SAVE THEM?");
+    titleText.setCharacterSize(80);
     titleText.setFillColor(Color::White);
-    titleText.setPosition(380.f, 20.f);
+    titleText.setPosition(50.f, 480.f);
+
+    Text press;
+    press.setFont(font);
+    press.setString("Press SPACE to continue....");
+    press.setCharacterSize(25);
+    press.setFillColor(Color::White);
+    press.setPosition(70.f, 600.f);
 
     // Create buttons
-    Button playButton("Play", font, 90, Vector2f(700, 250));
-    Button exitButton("Exit", font, 90, Vector2f(700, 350));
+    //Button playButton("Play", font, 90, Vector2f(700, 250));
+   // Button exitButton("Exit", font, 90, Vector2f(700, 350));
 
     // Game loop
     while (window.isOpen()) {
@@ -70,7 +77,7 @@ int main() {
             if (event.type == Event::Closed)
                 window.close();
 
-            if (event.type == Event::MouseButtonPressed) {
+            /*if (event.type == Event::MouseButtonPressed) {
                 if (event.mouseButton.button == Mouse::Left) {
                     Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
                     if (playButton.contains(mousePosition)) {
@@ -83,9 +90,9 @@ int main() {
                         window.close();
                     }
                 }
-            }
+            }*/
 
-            if (event.type == sf::Event::MouseMoved) {
+            /*if (event.type == sf::Event::MouseMoved) {
                 sf::Vector2f mousePosition = sf::Vector2f(sf::Mouse::getPosition(window));
                 if (playButton.contains(mousePosition)) {
                     playButton.setTextColor(sf::Color::Red);
@@ -100,24 +107,27 @@ int main() {
                     exitButton.setTextColor(sf::Color::White);
                 }
             }
+        */
         }
-    
+
 
         // Clear the window
-        window.clear();
+            window.clear();
 
-        // Draw the background
-        window.draw(background);
+            // Draw the background
+            window.draw(background);
 
-        // Draw the title text
-        window.draw(titleText);
+            // Draw the title text
+            window.draw(titleText);
+            window.draw(press);
 
-        // Draw buttons
-        playButton.draw(window);
-        exitButton.draw(window);
+            // Draw buttons
+            //playButton.draw(window);
+            //exitButton.draw(window);
 
-        // Display the contents of the window
-        window.display();
+            // Display the contents of the window
+            window.display();
+        
     }
 
     return 0;
