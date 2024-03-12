@@ -1,22 +1,123 @@
-// can you save them!.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <SFML/Graphics.hpp>
+
+using namespace std;
 using namespace sf;
 
-int main()
-{
-    std::cout << "Hello World!\n";
+struct Button {
+    sf::Text text;
+
+    Button(const std::string& buttonText, const sf::Font& font, unsigned int characterSize, sf::Vector2f position)
+        : text(buttonText, font, characterSize) {
+        text.setFillColor(sf::Color::White);
+        text.setPosition(position);
+    }
+
+    bool contains(sf::Vector2f point) const {
+        return text.getGlobalBounds().contains(point);
+    }
+
+    void setTextColor(sf::Color color) {
+        text.setFillColor(color);
+    }
+
+    void draw(sf::RenderWindow& window) const {
+        window.draw(text);
+    }
+};
+
+int main() {
+    // Create the game window
+    RenderWindow window(VideoMode(1500, 800), "SFML Window");
+
+    // Load the background texture
+    Texture backgroundTexture;
+    if (!backgroundTexture.loadFromFile("main menu.png")) {
+        cerr << "Failed to load background texture!" << endl;
+        return 1; // Error
+    }
+
+    // Create a sprite for the background
+    Sprite background(backgroundTexture);
+    background.setScale(window.getSize().x / static_cast<float>(backgroundTexture.getSize().x),
+        window.getSize().y / static_cast<float>(backgroundTexture.getSize().y));
+
+    // Load the font
+    Font font;
+    if (!font.loadFromFile("font text.ttf")) {
+        cerr << "Failed to load font!" << endl;
+        return 1;
+    }
+
+    // Create a text object
+    Text titleText;
+    titleText.setFont(font);
+    titleText.setString("CAN YOU SAVE THEM");
+    titleText.setCharacterSize(120);
+    titleText.setFillColor(Color::White);
+    titleText.setPosition(380.f, 20.f);
+
+    // Create buttons
+    Button playButton("Play", font, 90, Vector2f(700, 250));
+    Button exitButton("Exit", font, 90, Vector2f(700, 350));
+
+    // Game loop
+    while (window.isOpen()) {
+        // Handle events
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed)
+                window.close();
+
+            if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Left) {
+                    Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
+                    if (playButton.contains(mousePosition)) {
+                        cout << "play button clicked!" << endl;
+                        // Add code here to handle play button click
+                    }
+                    else if (exitButton.contains(mousePosition)) {
+                        cout << "Exit button clicked!" << endl;
+                        // Add code here to handle exit button click
+                        window.close();
+                    }
+                }
+            }
+
+            if (event.type == sf::Event::MouseMoved) {
+                sf::Vector2f mousePosition = sf::Vector2f(sf::Mouse::getPosition(window));
+                if (playButton.contains(mousePosition)) {
+                    playButton.setTextColor(sf::Color::Red);
+                }
+                else {
+                    playButton.setTextColor(sf::Color::White);
+                }
+                if (exitButton.contains(mousePosition)) {
+                    exitButton.setTextColor(sf::Color::Red);
+                }
+                else {
+                    exitButton.setTextColor(sf::Color::White);
+                }
+            }
+        }
+    
+
+        // Clear the window
+        window.clear();
+
+        // Draw the background
+        window.draw(background);
+
+        // Draw the title text
+        window.draw(titleText);
+
+        // Draw buttons
+        playButton.draw(window);
+        exitButton.draw(window);
+
+        // Display the contents of the window
+        window.display();
+    }
+
+    return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
