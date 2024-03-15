@@ -4,7 +4,7 @@
 using namespace std;
 using namespace sf;
 
-struct Button {
+struct Button    {
     sf::Text text;
 
     Button(const std::string& buttonText, const sf::Font& font, unsigned int characterSize, sf::Vector2f position)
