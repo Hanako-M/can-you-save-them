@@ -31,17 +31,22 @@ int main() {
     // Create the game window
     RenderWindow window(VideoMode(1500, 800), "SFML Window");
 
-    // Load the background texture
-    Texture backgroundTexture;
-    if (!backgroundTexture.loadFromFile("main menu.png")) {
+    // Load the splash texture
+    Texture splashTexture;
+    if (!splashTexture.loadFromFile("main menu.png")) {
         cerr << "Failed to load background texture!" << endl;
         return 1; // Error
     }
+    /*Texture backgroundtext;
+    if (!splashTexture.loadFromFile("main menu.png")) {
+        cerr << "Failed to load background texture!" << endl;
+        return 1; // Error
+    }*/
 
-    // Create a sprite for the background
-    Sprite background(backgroundTexture);
-    background.setScale(window.getSize().x / static_cast<float>(backgroundTexture.getSize().x),
-        window.getSize().y / static_cast<float>(backgroundTexture.getSize().y));
+    // Create a sprite for the splash screen
+    Sprite splash(splashTexture);
+   splash.setScale(window.getSize().x / static_cast<float>(splashTexture.getSize().x),
+        window.getSize().y / static_cast<float>(splashTexture.getSize().y));
 
     // Load the font
     Font font;
@@ -65,9 +70,7 @@ int main() {
     press.setFillColor(Color::White);
     press.setPosition(70.f, 600.f);
 
-    // Create buttons
-    //Button playButton("Play", font, 90, Vector2f(700, 250));
-   // Button exitButton("Exit", font, 90, Vector2f(700, 350));
+    bool showSplashScreen = true;
 
     // Game loop
     while (window.isOpen()) {
@@ -77,37 +80,6 @@ int main() {
             if (event.type == Event::Closed)
                 window.close();
 
-            /*if (event.type == Event::MouseButtonPressed) {
-                if (event.mouseButton.button == Mouse::Left) {
-                    Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
-                    if (playButton.contains(mousePosition)) {
-                        cout << "play button clicked!" << endl;
-                        // Add code here to handle play button click
-                    }
-                    else if (exitButton.contains(mousePosition)) {
-                        cout << "Exit button clicked!" << endl;
-                        // Add code here to handle exit button click
-                        window.close();
-                    }
-                }
-            }*/
-
-            /*if (event.type == sf::Event::MouseMoved) {
-                sf::Vector2f mousePosition = sf::Vector2f(sf::Mouse::getPosition(window));
-                if (playButton.contains(mousePosition)) {
-                    playButton.setTextColor(sf::Color::Red);
-                }
-                else {
-                    playButton.setTextColor(sf::Color::White);
-                }
-                if (exitButton.contains(mousePosition)) {
-                    exitButton.setTextColor(sf::Color::Red);
-                }
-                else {
-                    exitButton.setTextColor(sf::Color::White);
-                }
-            }
-        */
         }
 
 
@@ -115,15 +87,11 @@ int main() {
             window.clear();
 
             // Draw the background
-            window.draw(background);
+            window.draw(splash);
 
             // Draw the title text
             window.draw(titleText);
             window.draw(press);
-
-            // Draw buttons
-            //playButton.draw(window);
-            //exitButton.draw(window);
 
             // Display the contents of the window
             window.display();
