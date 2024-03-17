@@ -36,6 +36,7 @@ void resizedview(const sf::RenderWindow& window, sf::View& view) {
 
 int main() {
     cout << "hello";
+    cout << " game team"<<endl;
     // Create the game window
     RenderWindow window(VideoMode(1500, 800), "SFML Window");
     View view = window.getDefaultView();
