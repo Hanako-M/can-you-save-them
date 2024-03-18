@@ -44,19 +44,19 @@ int main() {
 
     // Load the splash texture
     Texture splashTexture;
-    if (!splashTexture.loadFromFile("main menu.png")) {
+    if (!splashTexture.loadFromFile("brosp.png")) {
         cerr << "Failed to load background texture!" << endl;
         return 1; // Error
     }
     
     // Create a sprite for the splash screen
     Sprite splash(splashTexture);
-   splash.setScale(window.getSize().x / static_cast<float>(splashTexture.getSize().x),
-        window.getSize().y / static_cast<float>(splashTexture.getSize().y));
+     splash.setScale(window.getSize().x / static_cast<float>(splashTexture.getSize().x),
+      window.getSize().y / static_cast<float>(splashTexture.getSize().y));
 
    // Load the background texture
    Texture backgroundTexture;
-   if (!backgroundTexture.loadFromFile("large background.png")) {
+   if (!backgroundTexture.loadFromFile("level1_background.png")) {
        cerr << "Failed to load background texture!" << endl;
        return 1; // Error
    }
@@ -66,7 +66,7 @@ int main() {
    background.setScale(1.1, 1.35);
 
    // Set the initial position of the background
-   Vector2f backgroundPosition(-500, -200);
+   Vector2f backgroundPosition(-300, -200);
 
    // Load the player texture
    Texture playerTexture;
@@ -83,7 +83,7 @@ int main() {
    Vector2f playerPosition(500, 480); // Initial position
 
    // Set the speed at which the background and player move
-   float scrollSpeed = 1.0f;
+   float scrollSpeed = 0.5f;
 
     // Load the font
     Font font;
@@ -98,14 +98,14 @@ int main() {
     titleText.setString("CAN YOU SAVE THEM?");
     titleText.setCharacterSize(80);
     titleText.setFillColor(Color::White);
-    titleText.setPosition(50.f, 480.f);
+    titleText.setPosition(400.f, 550.f);
 
     Text press;
     press.setFont(font);
     press.setString("Press SPACE to continue....");
     press.setCharacterSize(25);
     press.setFillColor(Color::White);
-    press.setPosition(70.f, 600.f);
+    press.setPosition(410.f, 650.f);
 
     bool showSplashScreen = true;
 
@@ -138,16 +138,17 @@ int main() {
         sf::Event::Resized;
         resizedview(window, view);
 
+        if (view.getCenter().x + view.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
+            view.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - view.getSize().x / 2.f, view.getCenter().y);
+        }
         // Update the view only if the player reaches the edges of the window
         if (player.getPosition().x > view.getCenter().x + 400) {
             view.move(5, 0); // Move the view to the right
         }
-        else if (player.getPosition().x < view.getCenter().x -820) {
+        else if (player.getPosition().x < view.getCenter().x -800) {
             view.move(-5, 0); // Move the view to the left
         }
-        if (view.getCenter().x + view.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
-            view.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - view.getSize().x / 2.f, view.getCenter().y);
-        }
+        
 
         // Clear the window
             window.clear();
