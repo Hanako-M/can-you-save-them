@@ -66,7 +66,7 @@ int main() {
    background.setScale(1.1, 1.35);
 
    // Set the initial position of the background
-   Vector2f backgroundPosition(0, -125);
+   Vector2f backgroundPosition(-500, -200);
 
    // Load the player texture
    Texture playerTexture;
@@ -124,12 +124,14 @@ int main() {
             playerPosition.y -= scrollSpeed;  // Move player up
         }
         if (Keyboard::isKeyPressed(Keyboard::A)) {
+            if (player.getPosition().x > background.getGlobalBounds().left)
             playerPosition.x -= scrollSpeed;// Move player left
         }
         if (Keyboard::isKeyPressed(Keyboard::S)) {
             playerPosition.y += scrollSpeed;     // Move player down
         }
         if (Keyboard::isKeyPressed(Keyboard::D)) {
+            if (player.getPosition().x + player.getGlobalBounds().width < background.getGlobalBounds().left + background.getGlobalBounds().width)
             playerPosition.x += scrollSpeed;     // Move player right
         }
        
@@ -137,11 +139,14 @@ int main() {
         resizedview(window, view);
 
         // Update the view only if the player reaches the edges of the window
-        if (player.getPosition().x > view.getCenter().x + 300) {
+        if (player.getPosition().x > view.getCenter().x + 400) {
             view.move(5, 0); // Move the view to the right
         }
-        else if (player.getPosition().x < view.getCenter().x - 400) {
+        else if (player.getPosition().x < view.getCenter().x -820) {
             view.move(-5, 0); // Move the view to the left
+        }
+        if (view.getCenter().x + view.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
+            view.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - view.getSize().x / 2.f, view.getCenter().y);
         }
 
         // Clear the window
