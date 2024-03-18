@@ -39,7 +39,8 @@ int main() {
     cout << " game team"<<endl;
     // Create the game window
     RenderWindow window(VideoMode(1500, 800), "SFML Window");
-    View view = window.getDefaultView();
+
+    sf::View view(sf::FloatRect(0, 0, 800, 600)); // Set up a default view
 
     // Load the splash texture
     Texture splashTexture;
@@ -82,7 +83,7 @@ int main() {
    Vector2f playerPosition(500, 480); // Initial position
 
    // Set the speed at which the background and player move
-   float scrollSpeed = 10.0f;
+   float scrollSpeed = 1.0f;
 
     // Load the font
     Font font;
@@ -115,28 +116,33 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
                 window.close();
-            // Move the background and player
-            if (Keyboard::isKeyPressed(Keyboard::W)) {
-                playerPosition.y -= scrollSpeed;  // Move player up
-            }
-            if (Keyboard::isKeyPressed(Keyboard::A)) {
-                playerPosition.x -= scrollSpeed;// Move player left
-            }
-            if (Keyboard::isKeyPressed(Keyboard::S)) {
-                playerPosition.y += scrollSpeed;     // Move player down
-            }
-            if (Keyboard::isKeyPressed(Keyboard::D)) {
-                playerPosition.x += scrollSpeed;     // Move player right
-            }
             if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space)
                 showSplashScreen = false;
-             sf::Event::Resized;
-             resizedview(window, view);
         }
-        // Get the center of the player sprite
-        //sf::Vector2f playerCenter(player.getPosition().x + player.getLocalBounds().width *7,
-           // player.getPosition().y + player.getLocalBounds().height /5);
+        // Move the background and player
+        if (Keyboard::isKeyPressed(Keyboard::W)) {
+            playerPosition.y -= scrollSpeed;  // Move player up
+        }
+        if (Keyboard::isKeyPressed(Keyboard::A)) {
+            playerPosition.x -= scrollSpeed;// Move player left
+        }
+        if (Keyboard::isKeyPressed(Keyboard::S)) {
+            playerPosition.y += scrollSpeed;     // Move player down
+        }
+        if (Keyboard::isKeyPressed(Keyboard::D)) {
+            playerPosition.x += scrollSpeed;     // Move player right
+        }
+       
+        sf::Event::Resized;
+        resizedview(window, view);
 
+        // Update the view only if the player reaches the edges of the window
+        if (player.getPosition().x > view.getCenter().x + 300) {
+            view.move(5, 0); // Move the view to the right
+        }
+        else if (player.getPosition().x < view.getCenter().x - 400) {
+            view.move(-5, 0); // Move the view to the left
+        }
 
         // Clear the window
             window.clear();
@@ -150,7 +156,7 @@ int main() {
             else {
                 // Draw game elements
                 
-                view.setCenter(player.getPosition());
+               //view.setCenter(player.getPosition());
                 window.setView(view);
                 window.draw(background);
                 window.draw(player);
