@@ -102,17 +102,17 @@ void Game_Play(RenderWindow& window);
 int main() {
     cout << "hello";
     cout << " game team" << endl;
-    
+
     RenderWindow window(VideoMode(1634, 1080), "SFML Window");
-    
+
 
     // Load the splash texture
-    Texture splashTexture,level1texture;
+    Texture splashTexture, level1texture;
     splashTexture.loadFromFile("brosp.png");
 
-    
+
     // Create a sprite for the splash screen
-    Sprite splash(splashTexture); 
+    Sprite splash(splashTexture);
     splash.setScale(window.getSize().x / static_cast<float>(splashTexture.getSize().x),
         window.getSize().y / static_cast<float>(splashTexture.getSize().y));
 
@@ -148,7 +148,7 @@ int main() {
     while (window.isOpen()) {
         // Handle events
         Event event;
-        
+
 
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
@@ -178,13 +178,13 @@ int main() {
             window.draw(splash);
             window.draw(titleText);
             window.draw(press);
-            
+
         }
 
-        
+
         // Display the contents of the window
         window.display();
-        
+
 
 
     }
@@ -205,7 +205,7 @@ void resizedview(const sf::RenderWindow& window, sf::View& view) {
 
 void Game_Play(RenderWindow& window)
 {
-   View cam(Vector2f(0.f, 0.f), Vector2f(1500.f, 1080.f));
+    View cam(Vector2f(0.f, 0.f), Vector2f(1500.f, 1080.f));
 
     Texture playerTexture;
     playerTexture.loadFromFile("Walk.png");
@@ -246,13 +246,13 @@ void Game_Play(RenderWindow& window)
 
 
     Clock clock;
-    int posCNT = 1, bgINX=0;
+    int posCNT = 1, bgINX = 0;
 
-   
+
     while (window.isOpen())
     {
         Event event;
-       cam.setCenter(Vector2f(player1.sprite.getPosition().x+600,500));
+        cam.setCenter(Vector2f(player1.sprite.getPosition().x + 600, 500));
         window.setView(cam);
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
@@ -287,7 +287,7 @@ void Game_Play(RenderWindow& window)
         sf::Event::Resized;
         resizedview(window, cam);
 
-      
+
         player1.update(timer);
 
         window.clear();
