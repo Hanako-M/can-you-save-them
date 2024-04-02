@@ -44,9 +44,8 @@ struct player
         }
         onground = false;
 
-
-        if (rect.left > right_wall)
-            rect.left = right_wall;
+/* if (rect.left > right_wall)
+            rect.left = right_wall;*/
         if (rect.left < left_wall)
             rect.left = left_wall;
 
@@ -207,16 +206,19 @@ void Game_Play(RenderWindow& window)
 {
     View cam(FloatRect(0, 0, 1200, 1100));
 
-    Texture playerTexture,mounttex;
+    Texture playerTexture,ob1tex;
     playerTexture.loadFromFile("Walk.png");
-    //mounttex.loadFromFile("mount.png");
+    ob1tex.loadFromFile("ob1.png");
     
     Texture level1texture;
     level1texture.loadFromFile("level1_background.png");
 
 
     Sprite background(level1texture);
-    background.setScale(1.1, 1.35);
+    background.setScale(1.1, 1.35); 
+    Sprite ob1(ob1tex);
+    ob1.setScale(0.2, 0.2);
+    ob1.setPosition(300, 750);
     /*Texture attack_Texture;
     attack_Texture.loadFromFile("Attack_1.png");
 
@@ -305,7 +307,7 @@ void Game_Play(RenderWindow& window)
 
         window.clear();
         window.draw(background);
-      
+        window.draw(ob1);
         window.draw(player1.sprite);
         window.display();
 
