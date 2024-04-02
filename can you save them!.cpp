@@ -205,11 +205,12 @@ void resizedview(const sf::RenderWindow& window, sf::View& view) {
 
 void Game_Play(RenderWindow& window)
 {
-    View cam(Vector2f(0.f, 0.f), Vector2f(1500.f, 1080.f));
+    View cam(FloatRect(0, 0, 1200, 1100));
 
-    Texture playerTexture;
+    Texture playerTexture,mounttex;
     playerTexture.loadFromFile("Walk.png");
-
+    //mounttex.loadFromFile("mount.png");
+    
     Texture level1texture;
     level1texture.loadFromFile("level1_background.png");
 
@@ -252,7 +253,7 @@ void Game_Play(RenderWindow& window)
     while (window.isOpen())
     {
         Event event;
-        cam.setCenter(Vector2f(player1.sprite.getPosition().x + 600, 500));
+        //cam.setCenter(Vector2f(player1.sprite.getPosition().x + 600, 500));
         window.setView(cam);
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
@@ -288,10 +289,23 @@ void Game_Play(RenderWindow& window)
         resizedview(window, cam);
 
 
+        if (cam.getCenter().x + cam.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
+            cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
+        }
+        // Update the view only if the player reaches the edges of the window
+        if (player1.sprite.getPosition().x > cam.getCenter().x + 350) {
+            cam.move(5, 0); // Move the view to the right
+        }
+        else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
+            cam.move(-5, 0); // Move the view to the left
+        }
+
+
         player1.update(timer);
 
         window.clear();
         window.draw(background);
+      
         window.draw(player1.sprite);
         window.display();
 
