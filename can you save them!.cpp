@@ -47,8 +47,8 @@ struct player
         }
         onground = false;
 
-/* if (rect.left > right_wall)
-            rect.left = right_wall;*/
+        /* if (rect.left > right_wall)
+                    rect.left = right_wall;*/
         if (rect.left < left_wall)
             rect.left = left_wall;
 
@@ -86,7 +86,16 @@ void handleLevelTransition(Sprite& background, player& player1, const Vector2f& 
     player1.rect.left = originalPlayerPosition.x;
     player1.rect.top = originalPlayerPosition.y;
 }
+/*void updateAnimation(Sprite& sprite, IntRect& rectSource, int boundary, Clock& clock2) {
+    if (clock2.getElapsedTime().asSeconds() > 0.1f) {
+        rectSource.left += 128;
+        if (rectSource.left >= boundary)
+            rectSource.left = 0;
 
+        sprite.setTextureRect(rectSource);
+        clock2.restart();
+    }
+}*/
 struct enemyhana {
     Sprite sprite;
     int speed;
@@ -111,7 +120,7 @@ struct enemyhana {
 
     void update(float timer)
     {
-        
+
         // Update position
         rect.left += move_x * timer;
 
@@ -275,18 +284,20 @@ void resizedview(const sf::RenderWindow& window, sf::View& view) {
 
 void Game_Play(RenderWindow& window)
 {
+    Clock clock;
+    Clock clock2;
     View cam(FloatRect(0, 0, 1200, 1100));
 
-    Texture playerTexture,ob1tex;
-    playerTexture.loadFromFile("Walk.png");
+    Texture playerTexture, ob1tex;
+    playerTexture.loadFromFile("Walk (1).png");
     ob1tex.loadFromFile("ob1.png");
-    
+
     Texture level1texture;
     level1texture.loadFromFile("level1_background.png");
 
 
     Sprite background(level1texture);
-    background.setScale(1.1, 1.35); 
+    background.setScale(1.1, 1.35);
     Sprite ob1(ob1tex);
     ob1.setScale(0.2, 0.2);
     ob1.setPosition(300, 750);
@@ -295,10 +306,10 @@ void Game_Play(RenderWindow& window)
     Texture hyenatext;
     hyenatext.loadFromFile("Hyena_walk.png");
 
-    RectangleShape rectangle(sf::Vector2f(100.f, 100.f)); 
+    RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
     rectangle.setPosition(6400.f, 800.f); // Position (x=300, y=200)
     rectangle.setFillColor(sf::Color::White); // Fill color
-   
+
     /*Texture attack_Texture;
     attack_Texture.loadFromFile("Attack_1.png");
 
@@ -332,7 +343,72 @@ void Game_Play(RenderWindow& window)
     Texture level2texture;
     level2texture.loadFromFile("level2_background.png");
 
+    Texture wolfwalktexture;
+    wolfwalktexture.loadFromFile("walk.png");
+    IntRect rectsourcewolfwalk(1408, 0, 128, 128);
+    Sprite wolfwalk(wolfwalktexture, rectsourcewolfwalk);
 
+    wolfwalk.setPosition(600.f, 530.f);
+    wolfwalk.setScale(2.2f, 2.2f);
+
+
+    Texture wolfattack1texture;
+    wolfattack1texture.loadFromFile("Attack_1.png");
+    IntRect rectsourcewolfattack1(640, 0, 128, 128);
+    Sprite wolfattack1(wolfattack1texture, rectsourcewolfattack1);
+
+    wolfattack1.setPosition(300.f, 300.f);
+    wolfattack1.setScale(2.2f, 2.2f);
+
+
+    Texture wolfattack2texture;
+    wolfattack2texture.loadFromFile("Run+Attack.png");
+    IntRect rectsourcewolfattack2(768, 0, 128, 128);
+    Sprite wolfattack2(wolfattack2texture, rectsourcewolfattack2);
+
+    wolfattack2.setPosition(300.f, 300.f);
+    wolfattack2.setScale(2.2f, 2.2f);
+
+    Texture wolfhurttexture;
+    wolfhurttexture.loadFromFile("Hurt.png");
+    IntRect rectsourcewolfhurt(256, 0, 128, 128);
+    Sprite wolfhurt(wolfhurttexture, rectsourcewolfhurt);
+    wolfhurt.setPosition(350.f, 300.f);
+    wolfhurt.setScale(2.2f, 2.2f);
+
+    Texture wolfdeadtexture;
+    wolfdeadtexture.loadFromFile("Dead.png");
+    IntRect rectsourcewolfdead(256, 0, 128, 128);
+    Sprite wolfdead(wolfdeadtexture, rectsourcewolfdead);
+    wolfdead.setPosition(350.f, 300.f);
+    wolfdead.setScale(2.2f, 2.2f);
+
+    Texture Centipedewalktexture;
+    Centipedewalktexture.loadFromFile("Centipede_walk.png");
+    IntRect rectsourcecentwalk(288, 0, 72, 72);
+    Sprite centipedewalk(Centipedewalktexture, rectsourcecentwalk);
+    centipedewalk.setPosition(400.f, 500.f);
+    centipedewalk.setScale(2.2f, 2.2f);
+
+    Texture Centipedeattacktexture;
+    Centipedeattacktexture.loadFromFile("Centipede_attack2.png");
+    IntRect rectsourcecentattack(432, 0, 72, 72);
+    Sprite centipedeattack(Centipedeattacktexture, rectsourcecentattack);
+    centipedeattack.setPosition(450.f, 500.f);
+    centipedeattack.setScale(2.2f, 2.2f);
+    Texture Centipedehurttexture;
+    Centipedehurttexture.loadFromFile("Centipede_hurt.png");
+    IntRect rectsourcecenthurt(144, 0, 72, 72);
+    Sprite centipedehurt(Centipedehurttexture, rectsourcecenthurt);
+    centipedehurt.setPosition(700.f, 600.f);
+    centipedehurt.setScale(2.2f, 2.2f);
+
+    Texture Centipededeadtexture;
+    Centipededeadtexture.loadFromFile("Centipede_death.png");
+    IntRect rectsourcecentdead(288, 0, 72, 72);
+    Sprite centipededead(Centipededeadtexture, rectsourcecentdead);
+    centipededead.setPosition(750.f, 600.f);
+    centipededead.setScale(2.2f, 2.2f);
 
     /*for (int i = 0; i < 3; i++) {
         cacodemon[i].sprite.setTexture(cacotext);
@@ -345,7 +421,8 @@ void Game_Play(RenderWindow& window)
     }*/
     hyena.speed = 1; // Set the speed of the enemy
 
-    Clock clock;
+   
+  
     int posCNT = 1, bgINX = 0;
 
 
@@ -364,6 +441,72 @@ void Game_Play(RenderWindow& window)
         if (timer > 100)
             timer = 100;
 
+    /*    updateAnimation(wolfwalk, rectsourcewolfwalk, 1408, clock2);
+        updateAnimation(wolfattack1, rectsourcewolfattack1, 640, clock2);
+        updateAnimation(wolfattack2, rectsourcewolfattack2, 768, clock2);
+        updateAnimation(wolfhurt, rectsourcewolfhurt, 256, clock2);
+        updateAnimation(wolfdead, rectsourcewolfdead, 256, clock2);*/
+        
+if (clock2.getElapsedTime().asSeconds() > 0.1f) {
+
+            rectsourcewolfwalk.left += 128;
+            if (rectsourcewolfwalk.left >= 1408)
+                rectsourcewolfwalk.left = 0;
+
+            rectsourcewolfattack1.left += 128;
+            if (rectsourcewolfattack1.left >= 640)
+                rectsourcewolfattack1.left = 0;
+
+            rectsourcewolfattack2.left += 128;
+            if (rectsourcewolfattack2.left >= 768)
+                rectsourcewolfattack2.left = 0;
+                
+            rectsourcewolfhurt.left += 128;
+            if (rectsourcewolfhurt.left >= 256)
+                rectsourcewolfhurt.left = 0;
+
+            rectsourcewolfdead.left += 128;
+            if (rectsourcewolfdead.left >= 256)
+                rectsourcewolfdead.left = 0;
+
+
+
+            rectsourcecentwalk.left += 72;
+            if (rectsourcecentwalk.left >= 288)
+                rectsourcecentwalk.left = 0;
+
+            rectsourcecentattack.left += 72;
+            if (rectsourcecentattack.left >= 432)
+                rectsourcecentattack.left = 0;
+
+            rectsourcecenthurt.left += 72;
+            if (rectsourcecenthurt.left >= 144)
+                rectsourcecenthurt.left = 0;
+
+            rectsourcecentdead.left += 72;
+            if (rectsourcecentdead.left >= 144)
+                rectsourcecentdead.left = 0;
+            centipededead.setTextureRect(rectsourcecentdead);
+
+
+            // Set texture rectangles for both animations
+            wolfwalk.setTextureRect(rectsourcewolfwalk);
+            wolfattack1.setTextureRect(rectsourcewolfattack1);
+            wolfattack2.setTextureRect(rectsourcewolfattack2);
+
+            wolfhurt.setTextureRect(rectsourcewolfhurt);
+
+
+            centipedehurt.setTextureRect(rectsourcecenthurt);
+            wolfdead.setTextureRect(rectsourcewolfdead);
+
+            centipedewalk.setTextureRect(rectsourcecentwalk);
+            centipedeattack.setTextureRect(rectsourcecentattack);
+
+
+            clock2.restart();
+        }
+    
         // Handle level transition
         if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
             handleLevelTransition(background, player1, playerPosition, level2texture);
@@ -404,27 +547,27 @@ void Game_Play(RenderWindow& window)
             cam.move(-5, 0); // Move the view to the left
         }
 
-        
+
 
         player1.update(timer);
 
-       /* for (int i = 0; i < 3; i++) {
-            cacodemon[i].animation += 0.03;
-            cacodemon[i].sprite.move(cacodemon[i].speed, 0);
+        /* for (int i = 0; i < 3; i++) {
+             cacodemon[i].animation += 0.03;
+             cacodemon[i].sprite.move(cacodemon[i].speed, 0);
 
-            if (cacodemon[i].sprite.getPosition().x < 0) {
-                int y = rand() % (9) + 8;
-                cacodemon[i].sprite.setPosition(0, y);
-                cacodemon[i].speed = rand() % (6 - 1 + 1) + 1;
-            }
+             if (cacodemon[i].sprite.getPosition().x < 0) {
+                 int y = rand() % (9) + 8;
+                 cacodemon[i].sprite.setPosition(0, y);
+                 cacodemon[i].speed = rand() % (6 - 1 + 1) + 1;
+             }
 
-            // Calculate the correct animation frame index, wrapping around if necessary
-            int frameWidth = 85;
-            int maxFrames = 512 / frameWidth; // Total frames in the animation
-            cacodemon[i].animation = fmod(cacodemon[i].animation, maxFrames);
+             // Calculate the correct animation frame index, wrapping around if necessary
+             int frameWidth = 85;
+             int maxFrames = 512 / frameWidth; // Total frames in the animation
+             cacodemon[i].animation = fmod(cacodemon[i].animation, maxFrames);
 
-            cacodemon[i].sprite.setTextureRect(IntRect(frameWidth * int(cacodemon[i].animation), 0, frameWidth, 64));
-        }*/
+             cacodemon[i].sprite.setTextureRect(IntRect(frameWidth * int(cacodemon[i].animation), 0, frameWidth, 64));
+         }*/
         float dt = clock.restart().asSeconds();
 
         hyena.update(dt);
@@ -435,6 +578,16 @@ void Game_Play(RenderWindow& window)
         window.draw(player1.sprite);
         //window.draw(hyena.sprite);
         window.draw(rectangle);
+        window.draw(wolfwalk);
+        window.draw(wolfattack1);
+        window.draw(wolfattack2);
+        window.draw(wolfhurt);
+        window.draw(wolfdead);
+        window.draw(centipedewalk);
+        window.draw(centipedeattack);
+        window.draw(centipedehurt);
+        window.draw(centipededead);
+
         /*for (int i = 0; i < 3; i++) {
             window.draw(cacodemon[i].sprite);
         }*/
