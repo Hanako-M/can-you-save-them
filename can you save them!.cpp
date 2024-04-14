@@ -231,14 +231,14 @@ int main() {
     titleText.setString("CAN YOU SAVE THEM?");
     titleText.setCharacterSize(80);
     titleText.setFillColor(Color::White);
-    titleText.setPosition(400.f, 550.f);
+    titleText.setPosition(340.f, 760.f);
 
     Text press;
     press.setFont(font);
     press.setString("Press SPACE to continue....");
     press.setCharacterSize(25);
     press.setFillColor(Color::White);
-    press.setPosition(410.f, 650.f);
+    press.setPosition(350.f, 880.f);
 
     bool showSplashScreen = true;
     int pagenum = 1;
@@ -480,7 +480,7 @@ void Game_Play(RenderWindow& window)
                 window.close();
 
             if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::P) {
+                if (event.key.code == sf::Keyboard::Escape) {
                     isPaused = !isPaused;
                     keyPressed = true;
                 }
@@ -494,8 +494,8 @@ void Game_Play(RenderWindow& window)
         sf::Vector2f cameraCenter = cam.getCenter();
 
        pausePicture.setPosition(cameraCenter - sf::Vector2f(pausePicture.getGlobalBounds().width / 2.f, pausePicture.getGlobalBounds().height / 2.f));
-       resumeButton.text.setPosition(Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.4f, pausePicture.getPosition().y + 200));
-       quitButton.text.setPosition(sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.4f, pausePicture.getPosition().y + 330));
+       resumeButton.text.setPosition(Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.25f, pausePicture.getPosition().y + 230));
+       quitButton.text.setPosition(sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.23f, pausePicture.getPosition().y + 370));
 
        sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
