@@ -154,16 +154,23 @@ enemyhana hyena;
 
 struct Button {
     sf::Text text;
+    sf::Color idleColor;
+    sf::Color hoverColor;
+    sf::Color pressedColor;
 
-    Button(const std::string& buttonText, const sf::Font& font, unsigned int characterSize, sf::Vector2f position)
-        : text(buttonText, font, characterSize) {
-        text.setFillColor(sf::Color::White);
+    Button(const std::string& buttonText, const sf::Font& font, unsigned int characterSize, sf::Vector2f position,
+        sf::Color idleCol, sf::Color hoverCol, sf::Color pressedCol)
+        : text(buttonText, font, characterSize), idleColor(idleCol), hoverColor(hoverCol), pressedColor(pressedCol) {
+        text.setFillColor(idleColor);
         text.setPosition(position);
     }
-
-    bool contains(sf::Vector2f point) const {
+     bool isClicked(Vector2f point) const {
         return text.getGlobalBounds().contains(point);
     }
+
+    /*bool contains(sf::Vector2f point) const {
+        return text.getGlobalBounds().contains(point);
+    }*/
 
     void setTextColor(sf::Color color) {
         text.setFillColor(color);
@@ -173,6 +180,19 @@ struct Button {
         window.draw(text);
     }
 
+    void update(sf::Vector2f mousePosition, bool isPressed) {
+        if (isClicked(mousePosition)) {
+            if (isPressed) {
+                text.setFillColor(pressedColor);
+            }
+            else {
+                text.setFillColor(hoverColor);
+            }
+        }
+        else {
+            text.setFillColor(idleColor);
+        }
+    }
 };
 
 void resizedview(const sf::RenderWindow& window, sf::View& view);
@@ -282,14 +302,35 @@ void resizedview(const sf::RenderWindow& window, sf::View& view) {
 }
 
 
+
 void Game_Play(RenderWindow& window)
 {
+    //pause menu
+    Font font;
+    font.loadFromFile("font text.ttf");
+
+  
+    Texture pausetex;
+    pausetex.loadFromFile("pausemenu.png");
+    sf::Sprite pausePicture(pausetex);
+   // pausePicture.setOrigin(pausetex.getSize().x / 2.0f, pausetex.getSize().y / 2.0f);
+    pausePicture.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
+    pausePicture.setScale(1.12f, 0.768f);
+
+    // Create resume button
+    Button resumeButton("Resume", font, 70, sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 1.f, pausePicture.getPosition().y + 220),
+        sf::Color::White, sf::Color::Green, sf::Color::Red);
+
+    // Create quit button
+    Button quitButton("Quit", font, 70, sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 1.f, pausePicture.getPosition().y + 330),
+        sf::Color::White, sf::Color::Green, sf::Color::Red);
+
     Clock clock;
     Clock clock2;
     View cam(FloatRect(0, 0, 1200, 1100));
 
     Texture playerTexture, ob1tex;
-    playerTexture.loadFromFile("Walk (1).png");
+    playerTexture.loadFromFile("Walk-player.png");
     ob1tex.loadFromFile("ob1.png");
 
     Texture level1texture;
@@ -421,9 +462,12 @@ void Game_Play(RenderWindow& window)
     }*/
     hyena.speed = 1; // Set the speed of the enemy
 
-   
-  
+    bool isPaused = false;
+    bool keyPressed = false; // Track if 'P' key was pressed
+
     int posCNT = 1, bgINX = 0;
+    window.clear(sf::Color(0, 0, 0, 128));
+
 
 
     while (window.isOpen())
@@ -434,160 +478,210 @@ void Game_Play(RenderWindow& window)
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
                 window.close();
-        }
-        float timer = clock.getElapsedTime().asMicroseconds();
-        clock.restart();
-        timer /= 1000;
-        if (timer > 100)
-            timer = 100;
 
-    /*    updateAnimation(wolfwalk, rectsourcewolfwalk, 1408, clock2);
-        updateAnimation(wolfattack1, rectsourcewolfattack1, 640, clock2);
-        updateAnimation(wolfattack2, rectsourcewolfattack2, 768, clock2);
-        updateAnimation(wolfhurt, rectsourcewolfhurt, 256, clock2);
-        updateAnimation(wolfdead, rectsourcewolfdead, 256, clock2);*/
-        
-if (clock2.getElapsedTime().asSeconds() > 0.1f) {
-
-            rectsourcewolfwalk.left += 128;
-            if (rectsourcewolfwalk.left >= 1408)
-                rectsourcewolfwalk.left = 0;
-
-            rectsourcewolfattack1.left += 128;
-            if (rectsourcewolfattack1.left >= 640)
-                rectsourcewolfattack1.left = 0;
-
-            rectsourcewolfattack2.left += 128;
-            if (rectsourcewolfattack2.left >= 768)
-                rectsourcewolfattack2.left = 0;
-                
-            rectsourcewolfhurt.left += 128;
-            if (rectsourcewolfhurt.left >= 256)
-                rectsourcewolfhurt.left = 0;
-
-            rectsourcewolfdead.left += 128;
-            if (rectsourcewolfdead.left >= 256)
-                rectsourcewolfdead.left = 0;
-
-
-
-            rectsourcecentwalk.left += 72;
-            if (rectsourcecentwalk.left >= 288)
-                rectsourcecentwalk.left = 0;
-
-            rectsourcecentattack.left += 72;
-            if (rectsourcecentattack.left >= 432)
-                rectsourcecentattack.left = 0;
-
-            rectsourcecenthurt.left += 72;
-            if (rectsourcecenthurt.left >= 144)
-                rectsourcecenthurt.left = 0;
-
-            rectsourcecentdead.left += 72;
-            if (rectsourcecentdead.left >= 144)
-                rectsourcecentdead.left = 0;
-            centipededead.setTextureRect(rectsourcecentdead);
-
-
-            // Set texture rectangles for both animations
-            wolfwalk.setTextureRect(rectsourcewolfwalk);
-            wolfattack1.setTextureRect(rectsourcewolfattack1);
-            wolfattack2.setTextureRect(rectsourcewolfattack2);
-
-            wolfhurt.setTextureRect(rectsourcewolfhurt);
-
-
-            centipedehurt.setTextureRect(rectsourcecenthurt);
-            wolfdead.setTextureRect(rectsourcewolfdead);
-
-            centipedewalk.setTextureRect(rectsourcecentwalk);
-            centipedeattack.setTextureRect(rectsourcecentattack);
-
-
-            clock2.restart();
-        }
-    
-        // Handle level transition
-        if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
-            handleLevelTransition(background, player1, playerPosition, level2texture);
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::P) {
+                    isPaused = !isPaused;
+                    keyPressed = true;
+                }
+            }  
+            if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::P) {
+                keyPressed = false;
+            }
         }
 
-        if (Keyboard::isKeyPressed(Keyboard::D))
-        {
-            player1.move_x = 0.25;
+        window.clear(sf::Color(0, 0, 0, 128));
+        sf::Vector2f cameraCenter = cam.getCenter();
 
-        }
-        if (Keyboard::isKeyPressed(Keyboard::A))
-        {
-            player1.move_x = -0.25;
-        }
+       pausePicture.setPosition(cameraCenter - sf::Vector2f(pausePicture.getGlobalBounds().width / 2.f, pausePicture.getGlobalBounds().height / 2.f));
+       resumeButton.text.setPosition(Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.4f, pausePicture.getPosition().y + 200));
+       quitButton.text.setPosition(sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.4f, pausePicture.getPosition().y + 330));
 
-        if (Keyboard::isKeyPressed(Keyboard::W))
-        {
-            if (player1.onground)
-            {
-                player1.move_y = -1.4;
-                player1.onground = false;
-                continue;
+       sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+        bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+
+        if (!isPaused) {
+            sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+
+            float timer = clock.getElapsedTime().asMicroseconds();
+            clock.restart();
+            timer /= 1000;
+            if (timer > 100)
+                timer = 100;
+
+            /*    updateAnimation(wolfwalk, rectsourcewolfwalk, 1408, clock2);
+                updateAnimation(wolfattack1, rectsourcewolfattack1, 640, clock2);
+                updateAnimation(wolfattack2, rectsourcewolfattack2, 768, clock2);
+                updateAnimation(wolfhurt, rectsourcewolfhurt, 256, clock2);
+                updateAnimation(wolfdead, rectsourcewolfdead, 256, clock2);*/
+
+            if (clock2.getElapsedTime().asSeconds() > 0.1f) {
+
+                rectsourcewolfwalk.left += 128;
+                if (rectsourcewolfwalk.left >= 1408)
+                    rectsourcewolfwalk.left = 0;
+
+                rectsourcewolfattack1.left += 128;
+                if (rectsourcewolfattack1.left >= 640)
+                    rectsourcewolfattack1.left = 0;
+
+                rectsourcewolfattack2.left += 128;
+                if (rectsourcewolfattack2.left >= 768)
+                    rectsourcewolfattack2.left = 0;
+
+                rectsourcewolfhurt.left += 128;
+                if (rectsourcewolfhurt.left >= 256)
+                    rectsourcewolfhurt.left = 0;
+
+                rectsourcewolfdead.left += 128;
+                if (rectsourcewolfdead.left >= 256)
+                    rectsourcewolfdead.left = 0;
+
+
+
+                rectsourcecentwalk.left += 72;
+                if (rectsourcecentwalk.left >= 288)
+                    rectsourcecentwalk.left = 0;
+
+                rectsourcecentattack.left += 72;
+                if (rectsourcecentattack.left >= 432)
+                    rectsourcecentattack.left = 0;
+
+                rectsourcecenthurt.left += 72;
+                if (rectsourcecenthurt.left >= 144)
+                    rectsourcecenthurt.left = 0;
+
+                rectsourcecentdead.left += 72;
+                if (rectsourcecentdead.left >= 144)
+                    rectsourcecentdead.left = 0;
+                centipededead.setTextureRect(rectsourcecentdead);
+
+
+                // Set texture rectangles for both animations
+                wolfwalk.setTextureRect(rectsourcewolfwalk);
+                wolfattack1.setTextureRect(rectsourcewolfattack1);
+                wolfattack2.setTextureRect(rectsourcewolfattack2);
+
+                wolfhurt.setTextureRect(rectsourcewolfhurt);
+
+
+                centipedehurt.setTextureRect(rectsourcecenthurt);
+                wolfdead.setTextureRect(rectsourcewolfdead);
+
+                centipedewalk.setTextureRect(rectsourcecentwalk);
+                centipedeattack.setTextureRect(rectsourcecentattack);
+
+
+                clock2.restart();
             }
 
+            // Handle level transition
+            if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
+                handleLevelTransition(background, player1, playerPosition, level2texture);
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::D))
+            {
+                player1.move_x = 0.25;
+
+            }
+            if (Keyboard::isKeyPressed(Keyboard::A))
+            {
+                player1.move_x = -0.25;
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::W))
+            {
+                if (player1.onground)
+                {
+                    player1.move_y = -1.4;
+                    player1.onground = false;
+                    continue;
+                }
+
+            }
+            sf::Event::Resized;
+            resizedview(window, cam);
+
+
+            if (cam.getCenter().x + cam.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
+                cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
+            }
+            // Update the view only if the player reaches the edges of the window
+            if (player1.sprite.getPosition().x > cam.getCenter().x + 350) {
+                cam.move(5, 0); // Move the view to the right
+            }
+            else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
+                cam.move(-5, 0); // Move the view to the left
+            }
+
+
+
+            player1.update(timer);
+
+            /* for (int i = 0; i < 3; i++) {
+                 cacodemon[i].animation += 0.03;
+                 cacodemon[i].sprite.move(cacodemon[i].speed, 0);
+
+                 if (cacodemon[i].sprite.getPosition().x < 0) {
+                     int y = rand() % (9) + 8;
+                     cacodemon[i].sprite.setPosition(0, y);
+                     cacodemon[i].speed = rand() % (6 - 1 + 1) + 1;
+                 }
+
+                 // Calculate the correct animation frame index, wrapping around if necessary
+                 int frameWidth = 85;
+                 int maxFrames = 512 / frameWidth; // Total frames in the animation
+                 cacodemon[i].animation = fmod(cacodemon[i].animation, maxFrames);
+
+                 cacodemon[i].sprite.setTextureRect(IntRect(frameWidth * int(cacodemon[i].animation), 0, frameWidth, 64));
+             }*/
+            float dt = clock.restart().asSeconds();
+
+            hyena.update(dt);
+
+            window.clear();
+            window.draw(background);
+            window.draw(ob1);
+            window.draw(player1.sprite);
+            //window.draw(hyena.sprite);
+            window.draw(rectangle);
+            window.draw(wolfwalk);
+            window.draw(wolfattack1);
+            window.draw(wolfattack2);
+            window.draw(wolfhurt);
+            window.draw(wolfdead);
+            window.draw(centipedewalk);
+            window.draw(centipedeattack);
+            window.draw(centipedehurt);
+            window.draw(centipededead);
         }
-        sf::Event::Resized;
-        resizedview(window, cam);
+        else {
+            sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
+            resumeButton.update(mousePosition, isMousePressed);
+            quitButton.update(mousePosition, isMousePressed);
 
-        if (cam.getCenter().x + cam.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
-            cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
+            window.clear();
+            // Draw the buttons if paused
+            window.clear(sf::Color(0, 0, 0, 128));
+            window.draw(pausePicture);
+            resumeButton.draw(window);
+            quitButton.draw(window);
+           
         }
-        // Update the view only if the player reaches the edges of the window
-        if (player1.sprite.getPosition().x > cam.getCenter().x + 350) {
-            cam.move(5, 0); // Move the view to the right
-        }
-        else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
-            cam.move(-5, 0); // Move the view to the left
+        if (isMousePressed && resumeButton.isClicked(mousePosition)) {
+            isPaused = false; // Resume the game
+            
         }
 
-
-
-        player1.update(timer);
-
-        /* for (int i = 0; i < 3; i++) {
-             cacodemon[i].animation += 0.03;
-             cacodemon[i].sprite.move(cacodemon[i].speed, 0);
-
-             if (cacodemon[i].sprite.getPosition().x < 0) {
-                 int y = rand() % (9) + 8;
-                 cacodemon[i].sprite.setPosition(0, y);
-                 cacodemon[i].speed = rand() % (6 - 1 + 1) + 1;
-             }
-
-             // Calculate the correct animation frame index, wrapping around if necessary
-             int frameWidth = 85;
-             int maxFrames = 512 / frameWidth; // Total frames in the animation
-             cacodemon[i].animation = fmod(cacodemon[i].animation, maxFrames);
-
-             cacodemon[i].sprite.setTextureRect(IntRect(frameWidth * int(cacodemon[i].animation), 0, frameWidth, 64));
-         }*/
-        float dt = clock.restart().asSeconds();
-
-        hyena.update(dt);
-
-        window.clear();
-        window.draw(background);
-        window.draw(ob1);
-        window.draw(player1.sprite);
-        //window.draw(hyena.sprite);
-        window.draw(rectangle);
-        window.draw(wolfwalk);
-        window.draw(wolfattack1);
-        window.draw(wolfattack2);
-        window.draw(wolfhurt);
-        window.draw(wolfdead);
-        window.draw(centipedewalk);
-        window.draw(centipedeattack);
-        window.draw(centipedehurt);
-        window.draw(centipededead);
-
+        if (isMousePressed && quitButton.isClicked(mousePosition)) {
+            window.close(); // Close the window
+            cout << "Quit button clicked!" << endl;
+        }
         /*for (int i = 0; i < 3; i++) {
             window.draw(cacodemon[i].sprite);
         }*/
