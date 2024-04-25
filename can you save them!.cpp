@@ -1,5 +1,10 @@
 #include <iostream>
+#include <cmath>
+#include <algorithm>
+#include <chrono>
+#include <thread>
 #include <SFML/Graphics.hpp>
+
 
 using namespace std;
 using namespace sf;
@@ -8,6 +13,7 @@ using namespace sf;
 float const ground = 600;
 float const right_wall = 1850;
 float const left_wall = 0;
+int health = 100;
 
 static const float view_height = 800;
 
@@ -75,8 +81,10 @@ struct player
 
     }
 };
+bool levelTransitionCompleted = false;
 
-void handleLevelTransition(Sprite& background, player& player1, const Vector2f& originalPlayerPosition, const Texture& levelTexture) {
+
+void handleLevelTransition(Sprite& background, player& player1, const Vector2f& originalPlayerPosition, const Texture& levelTexture, Sprite ob1[9], Sprite ob2[9], Sprite ob3[9], Sprite ob4[9], const Texture& ob3tex, const Texture& ob4tex, const Texture& ob1tex, const Texture& ob2tex) {
     // Change the background to level 2
     background.setTexture(levelTexture);
     background.setScale(1.2f, 1.2f);
@@ -85,72 +93,21 @@ void handleLevelTransition(Sprite& background, player& player1, const Vector2f& 
     // Reset player's position
     player1.rect.left = originalPlayerPosition.x;
     player1.rect.top = originalPlayerPosition.y;
+
+    // Update ob3 and ob4
+    for (int i = 0; i < 5; i++) {
+        ob3[i].setTexture(ob3tex);
+        ob3[i].setScale(0.08, 0.1);
+        int randomX = static_cast<float>(rand() % (5800 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+        ob3[i].setPosition(randomX, 765);
+
+        ob4[i].setTexture(ob4tex);
+        ob4[i].setScale(0.1, 0.1);
+        randomX = static_cast<float>(rand() % (5000 - static_cast<int>(ob1[i].getGlobalBounds().width))) + ((i + 1) * 600);
+        ob4[i].setPosition(randomX, 750);
+    }
+    levelTransitionCompleted = true;
 }
-/*void updateAnimation(Sprite& sprite, IntRect& rectSource, int boundary, Clock& clock2) {
-    if (clock2.getElapsedTime().asSeconds() > 0.1f) {
-        rectSource.left += 128;
-        if (rectSource.left >= boundary)
-            rectSource.left = 0;
-
-        sprite.setTextureRect(rectSource);
-        clock2.restart();
-    }
-}*/
-struct enemyhana {
-    Sprite sprite;
-    int speed;
-    float animation = 0;
-    FloatRect rect;
-    float currentframe;
-    float move_x;
-    bool movingRight; // Flag to indicate the direction of movement
-
-    void initial_values(Texture& playerTexture)
-    {
-        sprite.setTexture(playerTexture);
-        sprite.setScale(2.0, 2.0);
-        move_x = 0;
-        currentframe = 0;
-        movingRight = true; // Start moving to the right initially
-
-        // Set initial position
-        rect.left = 900; // Start position x = 500
-        rect.top = 700;  // Adjust as needed
-    }
-
-    void update(float timer)
-    {
-
-        // Update position
-        rect.left += move_x * timer;
-
-        // Switch direction if reaching the boundaries
-        if (rect.left >= 800)
-            movingRight = false;
-        else if (rect.left <= 500)
-            movingRight = true;
-
-        // Update animation
-        currentframe += 0.005 * timer;
-        if (currentframe > 8)
-        {
-            currentframe -= 8;
-        }
-
-        // Set sprite texture based on direction
-        if (move_x > 0)
-            sprite.setTextureRect(IntRect(48 * int(currentframe), 0, 48, 48));
-        else if (move_x < 0)
-            sprite.setTextureRect(IntRect(48 * int(currentframe) + 48, 0, -48, 48));
-
-        sprite.setPosition(rect.left, rect.top);
-        move_x = 0;
-    }
-};
-
-enemyhana hyena;
-
-
 
 struct Button {
     sf::Text text;
@@ -195,6 +152,16 @@ struct Button {
     }
 };
 
+
+bool isColliding(const RectangleShape& sprite1, const Sprite& sprite2) {
+    return sprite1.getGlobalBounds().intersects(sprite2.getGlobalBounds());
+}
+
+
+struct LastCollisionTime {
+    std::chrono::steady_clock::time_point time;
+};
+
 void resizedview(const sf::RenderWindow& window, sf::View& view);
 void Game_Play(RenderWindow& window);
 
@@ -226,6 +193,8 @@ int main() {
     Font font;
     font.loadFromFile("font text.ttf");
     // Create a text object
+    
+
     Text titleText;
     titleText.setFont(font);
     titleText.setString("CAN YOU SAVE THEM?");
@@ -305,33 +274,68 @@ void resizedview(const sf::RenderWindow& window, sf::View& view) {
 
 void Game_Play(RenderWindow& window)
 {
+     //obstacles
+    Texture ob1tex, ob2tex, ob3tex, ob4tex, ob5tex;
+    ob1tex.loadFromFile("ob1.png");
+    ob2tex.loadFromFile("spikes_1.png");
+    ob3tex.loadFromFile("spike2.png");
+    ob4tex.loadFromFile("spike1.png");
+    ob5tex.loadFromFile("blade_2.png");
+
+    // Initialize obstacle sprites
+    Sprite ob1[9], ob2[9], ob3[9], ob4[9], ob5[9];
+    for (int i = 0; i < 6; i++) {
+        ob2[i].setTexture(ob2tex);
+        ob2[i].setScale(0.145, 0.2);
+        int randomX = static_cast<float>(rand() % (5800-static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+
+        ob2[i].setPosition(randomX, 765);
+    }
+    for (int i = 0; i < 9; i++) {
+        ob1[i].setTexture(ob1tex);
+        ob1[i].setScale(0.186, 0.15);
+
+        // Generate random positions within the window boundaries
+        int randomX = static_cast<float>(rand() % (5000 - static_cast<int>(ob1[i].getGlobalBounds().width))) + ((i + 1) * 600);
+        ob1[i].setPosition(randomX, 750);
+    }
+    
+    RectangleShape rec(Vector2f( 28.f, 210.f));
+    rec.setFillColor(Color::White);
+
+
     //pause menu
     Font font;
-    font.loadFromFile("font text.ttf");
+    font.loadFromFile("28 Days Later.ttf");
 
-  
+    Text pause;
+    pause.setFont(font);
+    pause.setString("Pause");
+    pause.setCharacterSize(200);
+    pause.setFillColor(Color::White);
+    pause.setPosition(360.f, 140.f);
+
     Texture pausetex;
     pausetex.loadFromFile("pausemenu.png");
     sf::Sprite pausePicture(pausetex);
-   // pausePicture.setOrigin(pausetex.getSize().x / 2.0f, pausetex.getSize().y / 2.0f);
     pausePicture.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
     pausePicture.setScale(1.12f, 0.768f);
 
     // Create resume button
-    Button resumeButton("Resume", font, 70, sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 1.f, pausePicture.getPosition().y + 220),
+    Button resumeButton("Resume", font, 80, sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 1.f, pausePicture.getPosition().y + 500),
         sf::Color::White, sf::Color::Green, sf::Color::Red);
 
     // Create quit button
-    Button quitButton("Quit", font, 70, sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 1.f, pausePicture.getPosition().y + 330),
+    Button quitButton("Quit", font, 80, sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.f, pausePicture.getPosition().y + 900),
         sf::Color::White, sf::Color::Green, sf::Color::Red);
 
     Clock clock;
     Clock clock2;
     View cam(FloatRect(0, 0, 1200, 1100));
 
-    Texture playerTexture, ob1tex;
+    Texture playerTexture;
     playerTexture.loadFromFile("Walk-player.png");
-    ob1tex.loadFromFile("ob1.png");
+   
 
     Texture level1texture;
     level1texture.loadFromFile("level1_background.png");
@@ -339,40 +343,15 @@ void Game_Play(RenderWindow& window)
 
     Sprite background(level1texture);
     background.setScale(1.1, 1.35);
-    Sprite ob1(ob1tex);
-    ob1.setScale(0.2, 0.2);
-    ob1.setPosition(300, 750);
-
+    
 
     Texture hyenatext;
     hyenatext.loadFromFile("Hyena_walk.png");
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(6400.f, 800.f); // Position (x=300, y=200)
+    rectangle.setPosition(100.f, 400.f); // Position (x=300, y=200)
     rectangle.setFillColor(sf::Color::White); // Fill color
 
-    /*Texture attack_Texture;
-    attack_Texture.loadFromFile("Attack_1.png");
-
-
-    Texture attack2_Texture;
-    attack2_Texture.loadFromFile("Attack_2.png");
-
-
-    Texture jump_Texture;
-    jump_Texture.loadFromFile("Jump.png");
-
-    Texture run_Texture;
-    run_Texture.loadFromFile("Run.png");
-
-    Texture dead_Texture;
-    dead_Texture.loadFromFile("Dead.png");
-
-    */
-    enemyhana hyena;
-    hyena.initial_values(hyenatext);
-    hyena.sprite.setTextureRect(IntRect(0, 0, 48, 48));
-    hyena.rect.left = 10;
 
     player player1;
     player1.initial_values(playerTexture);
@@ -451,23 +430,18 @@ void Game_Play(RenderWindow& window)
     centipededead.setPosition(750.f, 600.f);
     centipededead.setScale(2.2f, 2.2f);
 
-    /*for (int i = 0; i < 3; i++) {
-        cacodemon[i].sprite.setTexture(cacotext);
-        cacodemon[i].speed = rand() % (6 - 1 + 1) + 1;
-        cacodemon->sprite.setScale(2.5, 2.5);
-        int y = rand() % (1500 - 90 + 1) + 90;
-
-        cacodemon[i].sprite.setPosition(0, y);
-        cacodemon[i].sprite.setTextureRect(IntRect(0,0,85,64));
-    }*/
-    hyena.speed = 1; // Set the speed of the enemy
-
+   
     bool isPaused = false;
-    bool keyPressed = false; // Track if 'P' key was pressed
+    bool keyPressed = false; 
 
     int posCNT = 1, bgINX = 0;
     window.clear(sf::Color(0, 0, 0, 128));
 
+    LastCollisionTime lastCollisionOb1[9]; // Store last collision time for ob1
+    LastCollisionTime lastCollisionOb2[9]; // Store last collision time for ob2
+
+    // Define the delay duration (e.g., 2 seconds)
+    const std::chrono::seconds delayDuration(1);
 
 
     while (window.isOpen())
@@ -484,7 +458,7 @@ void Game_Play(RenderWindow& window)
                     isPaused = !isPaused;
                     keyPressed = true;
                 }
-            }  
+            }
             if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::P) {
                 keyPressed = false;
             }
@@ -493,13 +467,81 @@ void Game_Play(RenderWindow& window)
         window.clear(sf::Color(0, 0, 0, 128));
         sf::Vector2f cameraCenter = cam.getCenter();
 
-       pausePicture.setPosition(cameraCenter - sf::Vector2f(pausePicture.getGlobalBounds().width / 2.f, pausePicture.getGlobalBounds().height / 2.f));
-       resumeButton.text.setPosition(Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.25f, pausePicture.getPosition().y + 230));
-       quitButton.text.setPosition(sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.23f, pausePicture.getPosition().y + 370));
+        pausePicture.setPosition(cameraCenter - sf::Vector2f(pausePicture.getGlobalBounds().width / 2.f, pausePicture.getGlobalBounds().height / 2.f));
+        resumeButton.text.setPosition(Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.45f, pausePicture.getPosition().y + 300));
+        quitButton.text.setPosition(sf::Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 2.30f, pausePicture.getPosition().y + 480));
 
-       sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
         bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+
+
+
+        if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
+            handleLevelTransition(background, player1, playerPosition, level2texture, ob1, ob2, ob3, ob4, ob3tex, ob4tex, ob2tex, ob1tex);
+
+        }
+
+        if (!levelTransitionCompleted) {
+            for (int i = 0; i < 9; ++i) {
+                if (isColliding(rec, ob1[i])) {
+                    auto currentTime = std::chrono::steady_clock::now();
+                    auto timeSinceLastCollision = currentTime - lastCollisionOb1[i].time;
+
+                    // Check if enough time has passed since the last collision
+                    if (timeSinceLastCollision >= delayDuration) {
+                        health--;
+                        cout << health << endl;
+                        lastCollisionOb1[i].time = currentTime; // Update last collision time
+                    }
+                }
+
+
+                if (isColliding(rec, ob2[i])) {
+                    auto currentTime = std::chrono::steady_clock::now();
+                    auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
+                    if (i == 5) {
+                        continue;
+                    }
+                    // Check if enough time has passed since the last collision
+                    if (timeSinceLastCollision >= delayDuration) {
+                        health--;
+                        cout << health << endl;
+                        lastCollisionOb2[i].time = currentTime; // Update last collision time
+                    }
+                }
+            }
+        }
+        else {
+            for (int i = 0; i < 9; ++i) {
+                if (isColliding(rec, ob3[i])) {
+                    auto currentTime = std::chrono::steady_clock::now();
+                    auto timeSinceLastCollision = currentTime - lastCollisionOb1[i].time;
+
+                    // Check if enough time has passed since the last collision
+                    if (timeSinceLastCollision >= delayDuration) {
+                        health--;
+                        cout << health << endl;
+                        lastCollisionOb1[i].time = currentTime; // Update last collision time
+                    }
+                }
+
+
+                if (isColliding(rec, ob4[i])) {
+                    auto currentTime = std::chrono::steady_clock::now();
+                    auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
+                    if (i == 5) {
+                        continue;
+                    }
+                    // Check if enough time has passed since the last collision
+                    if (timeSinceLastCollision >= delayDuration) {
+                        health--;
+                        cout << health << endl;
+                        lastCollisionOb2[i].time = currentTime; // Update last collision time
+                    }
+                }
+            }
+        }
 
         if (!isPaused) {
             sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -571,6 +613,20 @@ void Game_Play(RenderWindow& window)
                 wolfdead.setTextureRect(rectsourcewolfdead);
 
                 centipedewalk.setTextureRect(rectsourcecentwalk);
+                centipedewalk.setPosition(1500,550);
+                if (player1.rect.top >= 1200) {
+                    // Calculate direction vector from centipede to player
+                    sf::Vector2f direction = player1.sprite.getPosition() - centipedewalk.getPosition();
+
+
+                    // Set speed
+                    float speed = 1.0f; // Adjust as needed
+
+                    // Move centipede towards the player
+                    centipedewalk.move(direction * speed);
+                }
+                // Move centipede towards the player
+              
                 centipedeattack.setTextureRect(rectsourcecentattack);
 
 
@@ -578,9 +634,7 @@ void Game_Play(RenderWindow& window)
             }
 
             // Handle level transition
-            if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
-                handleLevelTransition(background, player1, playerPosition, level2texture);
-            }
+           
 
             if (Keyboard::isKeyPressed(Keyboard::D))
             {
@@ -589,10 +643,11 @@ void Game_Play(RenderWindow& window)
             }
             if (Keyboard::isKeyPressed(Keyboard::A))
             {
+                
                 player1.move_x = -0.25;
             }
 
-            if (Keyboard::isKeyPressed(Keyboard::W))
+            if (Keyboard::isKeyPressed(Keyboard::Space))
             {
                 if (player1.onground)
                 {
@@ -602,6 +657,39 @@ void Game_Play(RenderWindow& window)
                 }
 
             }
+            
+            if (!levelTransitionCompleted) {
+                for (int i = 0; i < 9; i++) {
+                    if (isColliding(rec, ob1[i])) {
+
+                        player1.move_x = 0;
+                    }
+                }
+                for (int i = 0; i < 9; i++) {
+                    if (isColliding(rec, ob2[i])) {
+                        if (i == 5) {
+                            continue;
+                        }
+                        player1.move_x = 0;
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < 9; i++) {
+                    if (isColliding(rec, ob3[i])) {
+
+                        player1.move_x = 0;
+                    }
+                }
+                for (int i = 0; i < 9; i++) {
+                    if (isColliding(rec, ob4[i])) {
+                        if (i == 5) {
+                            continue;
+                        }
+                        player1.move_x = 0;
+                    }
+                }
+            }
             sf::Event::Resized;
             resizedview(window, cam);
 
@@ -610,7 +698,7 @@ void Game_Play(RenderWindow& window)
                 cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
             }
             // Update the view only if the player reaches the edges of the window
-            if (player1.sprite.getPosition().x > cam.getCenter().x + 350) {
+            if (player1.sprite.getPosition().x > cam.getCenter().x + 50) {
                 cam.move(5, 0); // Move the view to the right
             }
             else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
@@ -621,42 +709,32 @@ void Game_Play(RenderWindow& window)
 
             player1.update(timer);
 
-            /* for (int i = 0; i < 3; i++) {
-                 cacodemon[i].animation += 0.03;
-                 cacodemon[i].sprite.move(cacodemon[i].speed, 0);
-
-                 if (cacodemon[i].sprite.getPosition().x < 0) {
-                     int y = rand() % (9) + 8;
-                     cacodemon[i].sprite.setPosition(0, y);
-                     cacodemon[i].speed = rand() % (6 - 1 + 1) + 1;
-                 }
-
-                 // Calculate the correct animation frame index, wrapping around if necessary
-                 int frameWidth = 85;
-                 int maxFrames = 512 / frameWidth; // Total frames in the animation
-                 cacodemon[i].animation = fmod(cacodemon[i].animation, maxFrames);
-
-                 cacodemon[i].sprite.setTextureRect(IntRect(frameWidth * int(cacodemon[i].animation), 0, frameWidth, 64));
-             }*/
+           
             float dt = clock.restart().asSeconds();
-
-            hyena.update(dt);
-
+            rec.setPosition(player1.sprite.getPosition().x+94, player1.sprite.getPosition().y);
+            //hyena.update(dt);
+            
             window.clear();
             window.draw(background);
-            window.draw(ob1);
+            //window.draw(rec);
+           
             window.draw(player1.sprite);
             //window.draw(hyena.sprite);
             window.draw(rectangle);
-            window.draw(wolfwalk);
-            window.draw(wolfattack1);
-            window.draw(wolfattack2);
-            window.draw(wolfhurt);
-            window.draw(wolfdead);
-            window.draw(centipedewalk);
-            window.draw(centipedeattack);
-            window.draw(centipedehurt);
-            window.draw(centipededead);
+            if (!levelTransitionCompleted) {
+                for (int i = 0; i < 9; i++) {
+                    window.draw(ob1[i]);
+                    window.draw(ob2[i]);
+                }
+                
+            }
+            else {
+                for (int i = 0; i < 9; i++) {
+                    window.draw(ob3[i]);
+                    window.draw(ob4[i]);
+                }
+            }
+           
         }
         else {
             sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -669,6 +747,7 @@ void Game_Play(RenderWindow& window)
             // Draw the buttons if paused
             window.clear(sf::Color(0, 0, 0, 128));
             window.draw(pausePicture);
+            window.draw(pause);
             resumeButton.draw(window);
             quitButton.draw(window);
            
@@ -689,4 +768,6 @@ void Game_Play(RenderWindow& window)
 
 
     }
+   
 }
+
