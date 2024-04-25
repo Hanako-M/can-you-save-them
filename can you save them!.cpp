@@ -13,7 +13,7 @@ using namespace sf;
 float const ground = 600;
 float const right_wall = 1850;
 float const left_wall = 0;
-int health = 100;
+int health = 10;
 
 static const float view_height = 800;
 
@@ -284,14 +284,14 @@ void Game_Play(RenderWindow& window)
 
     // Initialize obstacle sprites
     Sprite ob1[9], ob2[9], ob3[9], ob4[9], ob5[9];
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 4; i++) {
         ob2[i].setTexture(ob2tex);
         ob2[i].setScale(0.145, 0.2);
-        int randomX = static_cast<float>(rand() % (5800-static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+        int randomX = static_cast<float>(rand() % (5100-static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 600);
 
         ob2[i].setPosition(randomX, 765);
     }
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 4; i++) {
         ob1[i].setTexture(ob1tex);
         ob1[i].setScale(0.186, 0.15);
 
@@ -349,7 +349,7 @@ void Game_Play(RenderWindow& window)
     hyenatext.loadFromFile("Hyena_walk.png");
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(100.f, 400.f); // Position (x=300, y=200)
+    rectangle.setPosition(6450.f, 750.f); // Position (x=300, y=200)
     rectangle.setFillColor(sf::Color::White); // Fill color
 
 
