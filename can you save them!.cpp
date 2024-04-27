@@ -360,15 +360,15 @@ void Game_Play(RenderWindow& window)
     background.setScale(1.1, 1.35);
 
     Texture level3texture;
-    level3texture.loadFromFile("Untitled design.png");
+    level3texture.loadFromFile("level3_background.png");
  
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(650.f, 750.f); 
+    rectangle.setPosition(6450.f, 750.f); 
     rectangle.setFillColor(sf::Color::White); // Fill color
 
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
-    reclevel3.setPosition(670.f, 750.f); 
+    reclevel3.setPosition(6470.f, 750.f); 
     reclevel3.setFillColor(sf::Color::Red); // Fill color
 
 
