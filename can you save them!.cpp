@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <SFML/Graphics.hpp>
+#include <vector>
 
 
 using namespace std;
@@ -13,12 +14,11 @@ using namespace sf;
 float const ground = 600;
 float const right_wall = 1850;
 float const left_wall = 0;
-int health = 10;
+int health = 20;
 
 static const float view_height = 800;
 
-// Function to handle level transition
-
+// Function to handle level 
 
 
 
@@ -37,11 +37,24 @@ struct player
         move_x = 0;
         move_y = 0;
         currentframe = 0;
+        //  sprite.setOrigin(sprite.getTextureRect().width / 2, sprite.getTextureRect().height / 2);
+
 
 
     }
 
-    void update(float timer)
+    void initial_values_attack(Texture& playerTexture)
+    {
+        sprite.setTexture(playerTexture);
+        sprite.setScale(1.7, 1.7);
+        move_x = 0;
+        move_y = 0;
+        currentframe = 0;
+        // sprite.setOrigin(sprite.getTextureRect().width / 2, sprite.getTextureRect().height / 2);
+
+    }
+
+    void update(float timer, int no_frames)
     {
         rect.left += move_x * timer;
         rect.top += move_y * timer;
@@ -66,9 +79,9 @@ struct player
         }
 
         currentframe += 0.005 * timer;
-        if (currentframe > 8)
+        if (currentframe > no_frames)
         {
-            currentframe -= 8;
+            currentframe -= no_frames;
         }
 
         if (move_x > 0)
@@ -81,6 +94,7 @@ struct player
 
     }
 };
+
 bool levelTransitionCompleted = false;
 bool level3Completed = false;
 
@@ -317,7 +331,26 @@ void Game_Play(RenderWindow& window)
 
     RectangleShape rec(Vector2f(28.f, 210.f));
     rec.setFillColor(Color::White);
+    //healthbar
+    Texture healthtex, redtex;
+    healthtex.loadFromFile("healthbar.png");
+    redtex.loadFromFile("red.png");
 
+    Sprite healthbar,deletebar;
+    vector<Sprite> red(20);
+    deletebar.setTexture(healthtex);
+    deletebar.setScale(15, 5.8);
+    deletebar.setPosition(20, 200);
+    healthbar.setTexture(healthtex);
+    healthbar.setScale(15, 5.8);
+    healthbar.setPosition(20, 200);
+    for (int i = 0; i < 20; i++) {
+        red[i].setTexture(redtex);
+        red[i].setPosition(25+(25 * i), 202.5);
+        red[i].setScale(0.4,0.8);
+    }
+        
+    
 
     //pause menu
     Font font;
@@ -348,8 +381,17 @@ void Game_Play(RenderWindow& window)
     Clock clock2;
     View cam(FloatRect(0, 0, 1200, 1100));
 
-    Texture playerTexture;
-    playerTexture.loadFromFile("Walk-player.png");
+    Texture playerTexture[2];
+    playerTexture[0].loadFromFile("Walk-player.png");
+    playerTexture[1].loadFromFile("Attack_2.png");
+    player player1;
+    player1.initial_values_attack(playerTexture[1]);
+    player1.initial_values(playerTexture[0]);
+    player1.sprite.setTextureRect(IntRect(0, 0, 128, 128));
+    player1.rect.left = 10;
+    player1.rect.top = 500;
+    Vector2f playerPosition(10, 500); // Initial position
+    bool attack = 0;
 
 
     Texture level1texture;
@@ -370,14 +412,6 @@ void Game_Play(RenderWindow& window)
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
     reclevel3.setPosition(6470.f, 750.f); 
     reclevel3.setFillColor(sf::Color::Red); // Fill color
-
-
-    player player1;
-    player1.initial_values(playerTexture);
-    player1.sprite.setTextureRect(IntRect(0, 0, 128, 128));
-    player1.rect.left = 10;
-    player1.rect.top = 500;
-    Vector2f playerPosition(10, 500); // Initial position
 
     Texture level2texture;
     level2texture.loadFromFile("level2_background.png");
@@ -449,7 +483,7 @@ void Game_Play(RenderWindow& window)
     centipededead.setPosition(750.f, 600.f);
     centipededead.setScale(2.2f, 2.2f);
 
-
+    bool dead = 0;
     bool isPaused = false;
     bool keyPressed = false;
 
@@ -468,6 +502,7 @@ void Game_Play(RenderWindow& window)
         Event event;
         
         window.setView(cam);
+       
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
                 window.close();
@@ -516,8 +551,15 @@ void Game_Play(RenderWindow& window)
                     if (timeSinceLastCollision >= delayDuration) {
                         health--;
                         cout << health << endl;
+                        if (health <= 0)
+                        {
+                            player1.sprite.setTexture(playerTexture[2]);
+                            player1.move_x = 0.25;
+                            dead = 1;
+                        }
                         lastCollisionOb1[i].time = currentTime; // Update last collision time
                     }
+                  
                 }
 
 
@@ -531,8 +573,15 @@ void Game_Play(RenderWindow& window)
                     if (timeSinceLastCollision >= delayDuration) {
                         health--;
                         cout << health << endl;
+                        if (health <= 0)
+                        {
+                            player1.sprite.setTexture(playerTexture[2]);
+                            player1.move_x = 0.25;
+                            dead = 1;
+                        }
                         lastCollisionOb2[i].time = currentTime; // Update last collision time
                     }
+                   
                 }
             }
         }
@@ -547,8 +596,15 @@ void Game_Play(RenderWindow& window)
                         if (timeSinceLastCollision >= delayDuration) {
                             health--;
                             cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
                             lastCollisionOb1[i].time = currentTime; // Update last collision time
                         }
+                        
                     }
 
                     rectangle.setPosition(7000.f, 750.f);
@@ -560,15 +616,23 @@ void Game_Play(RenderWindow& window)
                         }
                         // Check if enough time has passed since the last collision
                         if (timeSinceLastCollision >= delayDuration) {
+                           
                             health--;
                             cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
                             lastCollisionOb2[i].time = currentTime; // Update last collision time
                         }
+                        
                     }
                 }
             }
             else {
-                reclevel3.setPosition(6700.f, 750.f);
+                reclevel3.setPosition(9000.f, 750.f);
                 //handle enemies and letters in level3
 
             }
@@ -665,25 +729,53 @@ void Game_Play(RenderWindow& window)
 
             if (Keyboard::isKeyPressed(Keyboard::D))
             {
+                player1.sprite.setTexture(playerTexture[0]);
                 player1.move_x = 0.25;
 
             }
             if (Keyboard::isKeyPressed(Keyboard::A))
             {
-
+                player1.sprite.setTexture(playerTexture[0]);
                 player1.move_x = -0.25;
             }
 
-            if (Keyboard::isKeyPressed(Keyboard::Space))
+            if (Keyboard::isKeyPressed(Keyboard::W))
             {
                 if (player1.onground)
                 {
-                    player1.move_y = -1.4;
-                    player1.onground = false;
-                    continue;
+                    if (attack == 0)
+                    {
+                        player1.sprite.setTexture(playerTexture[0]);
+                        player1.move_y = -1.4;
+                        player1.onground = false;
+                        continue;
+                    }
+                    else if (attack)
+                    {
+                        player1.sprite.setTexture(playerTexture[1]);
+                        player1.move_y = -1.4;
+                        player1.onground = false;
+                        continue;
+                    }
                 }
 
             }
+
+
+            if (Keyboard::isKeyPressed(Keyboard::X))
+            {
+                player1.sprite.setTexture(playerTexture[1]);
+                player1.move_x = 0.25;
+                attack = 1;
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::Z))
+            {
+                player1.sprite.setTexture(playerTexture[1]);
+                player1.move_x = -0.25;
+                attack = 1;
+            }
+
 
             if (!levelTransitionCompleted) {
                 for (int i = 0; i < 9; i++) {
@@ -737,21 +829,28 @@ void Game_Play(RenderWindow& window)
             else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
                 cam.move(-5, 0); // Move the view to the left
             }
-
-
-
-            player1.update(timer);
-
+            healthbar.setPosition(cam.getCenter().x-590,cam.getCenter().y-352.5);
+            for (int i = 0; i < 20; i++)
+                red[i].setPosition(cam.getCenter().x - (11*i)-370, cam.getCenter().y - 350);
+            if (attack) {
+                player1.update(timer, 3);
+                attack = false;
+            }
+            else
+                player1.update(timer, 3);
 
             float dt = clock.restart().asSeconds();
             rec.setPosition(player1.sprite.getPosition().x + 94, player1.sprite.getPosition().y);
-            
+          
 
             window.clear();
             window.draw(background);
             //window.draw(rec);
 
             window.draw(player1.sprite);
+            window.draw(healthbar);
+            for(int i=0;i<20;i++)
+            window.draw(red[i]);
             //window.draw(hyena.sprite);
             
             if (!levelTransitionCompleted) {
