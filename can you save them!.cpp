@@ -187,6 +187,7 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
         transitionRect.setFillColor(Color(0, 0, 0, static_cast<Uint8>(transitionAlpha)));
 
         // Draw the transition effect on top of everything
+    //    window.clear();
         window.draw(transitionRect);
         window.display();
     }
@@ -212,10 +213,12 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
         transitionRect.setFillColor(Color(0, 0, 0, static_cast<Uint8>(transitionAlpha)));
 
         // Draw the transition effect on top of everything
+        window.clear();
         window.draw(transitionRect);
         window.display();
     }
 }
+void Game_Play(RenderWindow& window);
 
 struct Button {
     sf::Text text;
@@ -267,18 +270,17 @@ bool isColliding(const RectangleShape& sprite1, const Sprite& sprite2) {
 
 
 struct LastCollisionTime {
-    std::chrono::steady_clock::time_point time;
+   chrono::steady_clock::time_point time;
 };
 
-void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, bool& transitionTriggered) {
+void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, bool& transitionTriggered, View cam) {
     float transitionAlpha = 0.0f; // Initial transparency of the transition sprite
     bool spacePressed = false; // Flag to indicate if space key is pressed
-
     Clock transitionTimer;
-
+    transitionTriggered = 0;
     // Only execute if the transition has not been triggered yet
     if (!transitionTriggered) {
-        while (transitionAlpha < 255 && !spacePressed) {
+        while (transitionAlpha <= 1 && !spacePressed) {
             Event event2;
             while (window.pollEvent(event2)) {
                 if (event2.type == Event::Closed)
@@ -287,18 +289,19 @@ void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, boo
                     spacePressed = true; // Set flag to true when space is pressed
             }
 
-            transitionAlpha += 3.0f; // Increment alpha gradually
+            transitionAlpha++; // Increment alpha gradually
 
-            transitionSprite.setColor(Color(255, 255, 255, static_cast <Uint8>(transitionAlpha)));
-            window.clear(); // Clear the window before drawing
+            //transitionSprite.setColor(Color(255, 255, 255, static_cast <Uint8>(transitionAlpha)));
+            transitionSprite.setPosition(cam.getCenter().x - 570, cam.getCenter().y - 430.5);
+            transitionSprite.setOrigin(0, 0);
+            //  window.clear(); // Clear the window before drawing
             window.draw(transitionSprite); // Draw the transition sprite
             window.display(); // Display the window
+            cout << "letter is ready to display";
         }
-
         // Set the transition triggered flag
         transitionTriggered = true;
     }
-
     // Wait for space key press to continue
     while (!spacePressed) {
         Event event;
@@ -310,7 +313,7 @@ void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, boo
         }
     }
 }
-void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, const Font& font) {
+void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, const Font& font, Sound sound) {
     // Create a sprite for the splash screen
     Sprite splash(splashTexture);
     splash.setScale(window.getSize().x / static_cast<float>(splashTexture.getSize().x),
@@ -332,56 +335,29 @@ void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, con
     press.setPosition(410.f, 650.f);
 
     // Draw the splash screen elements
+    sound.play();
     window.draw(splash);
     window.draw(titleText);
     window.draw(press);
     window.display();
-}
-void resizedview(const sf::RenderWindow& window, sf::View& view);
-void Game_Play(RenderWindow& window);
-// Function to handle skipping intro and proceeding to splash screen and sound three
-void skipIntro(RenderWindow& window, const Texture& splashTexture, const Font& font) {
-    bool splashScreenShown = false;
     bool spacePressed = false;
-    bool gameStarted = false;
-    SoundBuffer soundBuffer;
-
-    if (!soundBuffer.loadFromFile("out.wav")) {
-        cerr << "Failed to load sound!" << endl;
-        return;
-    }
-    Sound sound;
-    sound.setBuffer(soundBuffer);
-    sound.play();
-
-    while (sound.getStatus() == Sound::Playing) {
+    while (!spacePressed) {
         Event event;
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
                 window.close();
-            else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space) {
-                // Exit the loop if spacebar is pressed
-                sound.stop();  // Stop the sound
-                gameStarted = true;
-            }
-        }
-
-        if (!splashScreenShown) {
-            // Display the splash screen while sound is playing
-            displaySplashScreen(window, splashTexture, font);
-            splashScreenShown = true;
-        }
-
-        if (gameStarted) {
-            Game_Play(window); // Start the game
+            else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space)
+                spacePressed = true; // Set flag to true when space is pressed
         }
     }
+    if (spacePressed) Game_Play(window);
 }
+void resizedview(const sf::RenderWindow& window, sf::View& view);
 
 int main()
 {
     // The intro window
-    RenderWindow window(sf::VideoMode(1634, 1080), "Game Intro");
+    RenderWindow window(sf::VideoMode(1200, 800), "Game Intro");
     window.setFramerateLimit(60);
 
     // Create text
@@ -408,8 +384,14 @@ int main()
         cerr << "Failed to load haunted house image!" << endl;
         return -1;
     }
+    /* SoundBuffer mainSoundBuffer;
+     if (!mainSoundBuffer.loadFromFile("main_Sound.wav")) {
+         cerr << "Failed to load sound!" << endl;
 
-    // Create sprites and set positions and scales
+     }
+     Sound mainSound;
+     mainSound.setBuffer(mainSoundBuffer);*/
+     // Create sprites and set positions and scales
     Sprite backTheme_1(backThemeTexture);
     Sprite backTheme_2(backThemeTexture);
     Sprite backTheme_buffer(backThemeTexture); // New sprite acting as a buffer
@@ -441,12 +423,20 @@ int main()
     }
     Sound sound2;
     sound2.setBuffer(soundBuffer2);
+
+    SoundBuffer soundBuffer3;
+    if (!soundBuffer3.loadFromFile("out.wav")) {
+        cerr << "Failed to load sound!" << endl;
+        return -1;
+    }
+    Sound sound3;
+    sound3.setBuffer(soundBuffer3);
     // Track whether the second sound has been played
     bool sound2Played = false;
     bool sound3Played = false;
 
     // Set up the second sound
-    SoundBuffer soundBuffer3;
+   // SoundBuffer soundBuffer3;
 
     // Boolean flags to track game state
     bool introComplete = false;
@@ -464,15 +454,15 @@ int main()
 
 
 
-    // Load the splash texture
+    // Load the  texture
     Texture splashTexture, level1texture;
     splashTexture.loadFromFile("brosp.png");
 
-   
+
 
     //// Create a sprite for the splash screen
 
-   
+
     Sprite background(level1texture);
     background.setScale(1.1, 1.35);
 
@@ -497,113 +487,83 @@ int main()
             }
 
         }
-        
+
         if (introSkipped) {
-            skipIntro(window, splashTexture, font1);
+            displaySplashScreen(window, splashTexture, font1,sound3);
+           // skipIntro(window, splashTexture, font1);
         }
-        // Move backgrounds horizontally
-        float speed = 1.0f; // Adjust this value to change the speed of motion
-        backTheme_1.move(-speed, 0);
-        backTheme_2.move(-speed, 0);
-        backTheme_buffer.move(-speed, 0);
+        else {
+            // Move backgrounds horizontally
+            float speed = 1.0f; // Adjust this value to change the speed of motion
+            backTheme_1.move(-speed, 0);
+            backTheme_2.move(-speed, 0);
+            backTheme_buffer.move(-speed, 0);
 
-        // If backTheme1 moves out of the window, move it to the right of backTheme2
-        if (backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width < 0)
-            backTheme_1.setPosition(backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width - 1, 0);
+            // If backTheme1 moves out of the window, move it to the right of backTheme2
+            if (backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width < 0)
+                backTheme_1.setPosition(backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width - 1, 0);
 
-        // If backTheme2 moves out of the window, move it to the right of backTheme1
-        if (backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width < 0)
-            backTheme_2.setPosition(backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width - 1, 0);
+            // If backTheme2 moves out of the window, move it to the right of backTheme1
+            if (backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width < 0)
+                backTheme_2.setPosition(backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width - 1, 0);
 
-        // If buffer sprite moves out of the window, move it to the right of backTheme2
-        if (backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width < 0)
-            backTheme_buffer.setPosition(backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width - 1, 0);
+            // If buffer sprite moves out of the window, move it to the right of backTheme2
+            if (backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width < 0)
+                backTheme_buffer.setPosition(backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width - 1, 0);
 
-        // Play the second sound when backgrounds start to appear
-        if ((backTheme_1.getPosition().x >= 0 || backTheme_2.getPosition().x >= 0) && !sound2Played) {
-            sound2.play();
-            sound2Played = true;
-            sound2Timer.restart();
-        }
-
-        // Check if 7 seconds have passed since sound2 started playing
-        if (sound2Timer.getElapsedTime().asSeconds() >= 7 && !transitionComplete) {
-            // Call the transition function with the transition text
-            vector<string> transitionTexts = {
-                "Outside the woods stretched endlessly into the night  ",
-                "the whispers of the dark calling to him  ",
-                "assuring him that the threats he sensed had indeed arrived  "
-            };
-
-            displayTransition(window, font, soundBuffer, sound, transitionTexts, yOffset);
-            transitionComplete = true;
-            transitionTimer.restart(); // Transition is complete
-        }
-        // Check if 12 seconds have passed since sound2 started playing and the first transition is complete
-        if (transitionComplete && !secondTransitionComplete && transitionTimer.getElapsedTime().asSeconds() >= 5) {
-            // Call the transition function with the transition text for the second transition
-            vector<string> secondTransitionTexts = {
-                "Can you defy the odds alongside Ori  ",
-                "guiding him to find what brought him here  ",
-            };
-
-            displayTransition(window, font, soundBuffer, sound, secondTransitionTexts, yOffset);
-            secondTransitionComplete = true; // Second transition is complete
-            outroTimer.restart(); // Start the outro timer
-            outroStarted = true; // Set the outro flag
-        }
-        // Check if 5 seconds have passed since the last transition
-        if (outroStarted && outroTimer.getElapsedTime().asSeconds() >= 5) {
-            sound2.stop();
-            if (!soundBuffer3.loadFromFile("out.wav")) {
-                cerr << "Failed to load sound!" << endl;
-                return -1;
-            }
-            Sound sound3;
-            sound3.setBuffer(soundBuffer3);
-            sound3.play();
-            sound3Played = true;
-            if (sound3Played) {
-
-                // Display the splash screen while sound3 is playing
-                displaySplashScreen(window, splashTexture, font1);
+            // Play the second sound when backgrounds start to appear
+            if ((backTheme_1.getPosition().x >= 0 || backTheme_2.getPosition().x >= 0) && !sound2Played) {
+                sound2.play();
+                sound2Played = true;
+                sound2Timer.restart();
             }
 
-            // Main loop for handling events while sound3 is playing and splash screen is displayed
-            while (sound3.getStatus() == Sound::Playing) {
-                Event event;
-                while (window.pollEvent(event)) {
-                    if (event.type == Event::Closed)
-                        window.close();
-                    else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space) {
-                        // Exit the loop if spacebar is pressed
-                        sound3.stop();  // Stop the sound
-                        pagenum = 2;
-                    }
+            // Check if 7 seconds have passed since sound2 started playing
+            if (sound2Timer.getElapsedTime().asSeconds() >= 7 && !transitionComplete) {
+                // Call the transition function with the transition text
+                vector<string> transitionTexts = {
+                    "Outside the woods stretched endlessly into the night  ",
+                    "the whispers of the dark calling to him  ",
+                    "assuring him that the threats he sensed had indeed arrived  "
+                };
+
+                displayTransition(window, font, soundBuffer, sound, transitionTexts, yOffset);
+                transitionComplete = true;
+                transitionTimer.restart(); // Transition is complete
+            }
+            // Check if 12 seconds have passed since sound2 started playing and the first transition is complete
+            if (transitionComplete && !secondTransitionComplete && transitionTimer.getElapsedTime().asSeconds() >= 5) {
+                // Call the transition function with the transition text for the second transition
+                vector<string> secondTransitionTexts = {
+                    "Can you defy the odds alongside Ori  ",
+                    "guiding him to find what brought him here  ",
+                };
+
+                displayTransition(window, font, soundBuffer, sound, secondTransitionTexts, yOffset);
+                secondTransitionComplete = true; // Second transition is complete
+                outroTimer.restart(); // Start the outro timer
+                outroStarted = true; // Set the outro flag
+            }
+            // Check if 5 seconds have passed since the last transition
+            if (outroStarted && outroTimer.getElapsedTime().asSeconds() >= 5) {
+                sound2.stop();
+                sound3Played = true;
+                if (sound3Played) {
+
+                    // Display the splash screen while sound3 is playing
+                    displaySplashScreen(window, splashTexture, font1, sound3);
                 }
-
             }
 
-            if (pagenum == 2)
-            {
-                Game_Play(window);
-            }
-
+            // Draw backgrounds and transition rectangle
+            window.clear();
+            window.draw(backTheme_1);
+            window.draw(backTheme_2);
+            window.draw(backTheme_buffer);
         }
-
-
-
-        // Draw backgrounds and transition rectangle
-        window.clear();
-        window.draw(backTheme_1);
-        window.draw(backTheme_2);
-        window.draw(backTheme_buffer);
-
-
 
         window.display();
     }
-
 
     return 0;
 }
@@ -726,11 +686,34 @@ void Game_Play(RenderWindow& window)
 
     // Load the picture texture
     Texture letter1Texture;
-    if (!letter1Texture.loadFromFile("the letter.png")) {
+    if (!letter1Texture.loadFromFile("FirstLetter.png")) {
         cerr << "Failed to load picture texture\n";
         return;
     }
     Sprite letter1Sprite(letter1Texture);
+    // Load the picture texture
+    Texture letter2Texture;
+    if (!letter2Texture.loadFromFile("secondLetter.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite letter2Sprite(letter2Texture);
+    // Load the picture texture
+    Texture letter3Texture;
+    if (!letter3Texture.loadFromFile("thirdLetter.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite letter3Sprite(letter3Texture);
+    /*SoundBuffer soundBuffer;
+    if (!soundBuffer.loadFromFile("main_Sound.wav")){
+        cerr << "Failed to load sound!" << endl;
+      
+    }
+    Sound sound;
+    sound.setBuffer(soundBuffer);*/
+
+
 
     //RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
     //rectangle.setPosition(6400.f, 800.f); // Position (x=300, y=200)
@@ -821,6 +804,7 @@ void Game_Play(RenderWindow& window)
 
     Clock letterClock;
     bool showLetter = false;
+    bool letter1 = 0;
     bool letterDisplayed = false;
     bool fallingAnimationFinished = false; // Add a variable to track if the falling animation has finished
     float letterFallSpeed = 2.0f;
@@ -863,6 +847,8 @@ void Game_Play(RenderWindow& window)
 
     while (window.isOpen())
     {
+      // sound.play();
+      // sound.setLoop(true);
         Event event;
         //cam.setCenter(Vector2f(player1.sprite.getPosition().x + 600, 500));
         window.setView(cam);
@@ -880,7 +866,7 @@ void Game_Play(RenderWindow& window)
             }
 
         }
-      
+       
         window.clear(sf::Color(0, 0, 0, 128));
         sf::Vector2f cameraCenter = cam.getCenter();
         pausePicture.setPosition(cameraCenter - sf::Vector2f(pausePicture.getGlobalBounds().width / 2.f, pausePicture.getGlobalBounds().height / 2.f));
@@ -890,12 +876,9 @@ void Game_Play(RenderWindow& window)
         sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
         bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-        if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
-            handleLevelTransition(background, player1, playerPosition, level2texture, ob1, ob2, ob3, ob4, ob3tex, ob4tex, ob2tex, ob1tex);
-
-        }
-
+        
         if (player1.sprite.getGlobalBounds().intersects(reclevel3.getGlobalBounds())) {
+            displayLetterTransition(window, letter3Sprite, transitionTriggered, cam);
             Level3Transition(background, player1, playerPosition, level3texture);
 
         }
@@ -999,7 +982,8 @@ void Game_Play(RenderWindow& window)
         if (!isPaused) {
             sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
             bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-
+             
+           // sound.play();
             float timer = clock.getElapsedTime().asMicroseconds();
             clock.restart();
             timer /= 1000;
@@ -1191,10 +1175,7 @@ void Game_Play(RenderWindow& window)
 
                 clockenemy.restart();
             }
-            // Handle level transition
-           /* if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
-                handleLevelTransition(background, player1, playerPosition, level2texture);
-            }*/
+            
 
             if (Keyboard::isKeyPressed(Keyboard::D))
             {
@@ -1302,15 +1283,6 @@ void Game_Play(RenderWindow& window)
                 }
             }
 
-            // Display the letter only once the falling animation is finished
-            if (showLetter && !letterDisplayed) {
-                // Assuming you have already loaded your transition sprite
-                cout << "DONE" << endl;
-                // Replace "transitionSprite" with your actual sprite variable
-                displayLetterTransition(window, letter1Sprite, transitionTriggered);
-                showLetter = false;
-                letterDisplayed = true; // Update the flag to indicate that the letter has been displayed
-            }
             if (cam.getCenter().x + cam.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
                 cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
             }
@@ -1351,9 +1323,9 @@ void Game_Play(RenderWindow& window)
             wol.setPosition(wolf.getPosition().x - 70.f, wolf.getPosition().y - 20.f);
             wol.setSize(Vector2f(120, 140));
 
-         //   float dt = clock.restart().asSeconds();
-            //   window.clear();
-             //  window.draw(background);
+            //   float dt = clock.restart().asSeconds();
+               //   window.clear();
+                //  window.draw(background);
             window.draw(player1.sprite);
             window.draw(letterSprite);
             window.draw(rectangle);
@@ -1369,7 +1341,26 @@ void Game_Play(RenderWindow& window)
                 window.draw(cacodemon[i].sprite);
             }*/
             //window.draw(hyena.sprite);
+            
+            if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
 
+                // Display the letter transition
+                displayLetterTransition(window, letter2Sprite, transitionTriggered, cam);
+                // window.draw(letter1Sprite);
+                handleLevelTransition(background, player1, playerPosition, level2texture, ob1, ob2, ob3, ob4, ob3tex, ob4tex, ob2tex, ob1tex);
+
+            }
+              // Display the letter only once the falling animation is finished
+            if (showLetter && !letterDisplayed) {
+                // Assuming you have already loaded your transition sprite
+                cout << "DONE" << endl;
+                // Replace "transitionSprite" with your actual sprite variable
+                displayLetterTransition(window, letter1Sprite, transitionTriggered, cam);
+                // window.draw(letter1Sprite);
+                showLetter = false;
+                letterDisplayed = true; // Update the flag to indicate that the letter has been displayed
+            }
+           
             if (!levelTransitionCompleted) {
                 for (int i = 0; i < 9; i++) {
                     window.draw(ob1[i]);
@@ -1377,6 +1368,7 @@ void Game_Play(RenderWindow& window)
                 }
                 window.draw(rectangle);
             }
+           
             else {
                 if (!level3Completed) {
                     for (int i = 0; i < 9; i++) {
@@ -1389,8 +1381,6 @@ void Game_Play(RenderWindow& window)
                     // handle enemies draw
                 }
             }
-
-
 
         }
         else {
@@ -1419,7 +1409,7 @@ void Game_Play(RenderWindow& window)
             window.close(); // Close the window
             cout << "Quit button clicked!" << endl;
         }
-     
+
         window.display();
 
 
@@ -1431,7 +1421,6 @@ void Game_Play(RenderWindow& window)
 
 
 
-     
-       
 
-    
+
+
