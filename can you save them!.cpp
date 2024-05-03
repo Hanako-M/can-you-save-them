@@ -14,7 +14,7 @@ using namespace sf;
 float const ground = 600;
 float const right_wall = 1850;
 float const left_wall = 0;
-int health = 10;
+int health = 20;
 
 static const float view_height = 800;
 struct player
@@ -117,8 +117,8 @@ void Level3Transition(Sprite& background, player& player1, const Vector2f& origi
 
 
 void displayTextLetterByLetter(RenderWindow& window, const Font& font, const string& fullText, float delay, Sound& sound, const SoundBuffer& soundBuffer, float yOffset) {
-    Text text("", font, 36);
-    text.setPosition(0, yOffset);
+    Text text("", font, 45);
+    text.setPosition(75, yOffset);
     string displayedText = "";
     unsigned int charIndex = 0;
     Clock clock;
@@ -132,8 +132,8 @@ void displayTextLetterByLetter(RenderWindow& window, const Font& font, const str
         }
 
         if (fullText[charIndex] == '\n') {
-            yOffset += 40.0f; // Move to the next line
-            text.setPosition(0, yOffset);
+            yOffset += 60.0f; // Move to the next line
+            text.setPosition(20, yOffset);
             charIndex++; // Skip the newline character
             continue;
         }
@@ -170,7 +170,7 @@ void handleLevelTransition(Sprite& background, player& player1, const Vector2f& 
     levelTransitionCompleted = true;
 }
 void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer& soundBuffer, Sound& sound, const vector<string>& transitionTexts, float yOffset) {
-    RectangleShape transitionRect(Vector2f(1200, 800));
+    RectangleShape transitionRect(Vector2f(1634, 1080));
     transitionRect.setFillColor(Color::Black);
     float transitionAlpha = 0.0f; // Initial transparency of the transition rectangle
 
@@ -195,11 +195,11 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
     // Display transition theme text letter by letter
     for (const auto& transitionText : transitionTexts) {
         displayTextLetterByLetter(window, font, transitionText, 0.1f, sound, soundBuffer, yOffset);
-        yOffset += 40.0f; // Move to the next line
+        yOffset += 60.0f; // Move to the next line
     }
 
     // Reset yOffset for the reverse transition
-    yOffset = 0.0f;
+    yOffset = 70.0f;
 
     // Gradually fade back out
     while (transitionAlpha < 255) {
@@ -325,20 +325,32 @@ void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, con
     titleText.setString("CAN YOU SAVE THEM?");
     titleText.setCharacterSize(80);
     titleText.setFillColor(Color::White);
-    titleText.setPosition(400.f, 550.f);
+    titleText.setPosition(280.f, 760.f);
 
     Text press;
     press.setFont(font);
     press.setString("Press SPACE to continue....");
     press.setCharacterSize(25);
     press.setFillColor(Color::White);
-    press.setPosition(410.f, 650.f);
+    press.setPosition(290.f, 880.f);
+    vector<string> guidtext = {
+
+    " controls: \n press[x][z] to attack \n press[->] to move right \n press[<-] to move left \n press[space] to jump" };
+
+    Text guide;
+    guide.setFont(font);
+    guide.setString("controls: \n\n press [x] [z] to attack \n press [->] to move right \n press [<-] to move left \n press [space] to jump \n press [esc] to pause");
+    guide.setCharacterSize(24);
+    guide.setFillColor(Color::White);
+    guide.setPosition(1360.f, 760.f);
+
 
     // Draw the splash screen elements
     sound.play();
     window.draw(splash);
     window.draw(titleText);
     window.draw(press);
+    window.draw(guide);
     window.display();
     bool spacePressed = false;
     while (!spacePressed) {
@@ -357,7 +369,7 @@ void resizedview(const sf::RenderWindow& window, sf::View& view);
 int main()
 {
     // The intro window
-    RenderWindow window(sf::VideoMode(1200, 800), "Game Intro");
+    RenderWindow window(sf::VideoMode(1634, 1080), "Game Intro");
     window.setFramerateLimit(60);
 
     // Create text
@@ -380,7 +392,7 @@ int main()
 
     // Load background image
     Texture backThemeTexture;
-    if (!backThemeTexture.loadFromFile("back.png")) {
+    if (!backThemeTexture.loadFromFile("intro town.png")) {
         cerr << "Failed to load haunted house image!" << endl;
         return -1;
     }
@@ -405,13 +417,13 @@ int main()
     backTheme_buffer.setScale(scaleX, scaleY);
 
     // Display intro text letter by letter with sound
-    float yOffset = 0.0f;
+    float yOffset = 100.0f;
     string fullText1 = "It was a terrifying night when Ori woke up   \n";
     displayTextLetterByLetter(window, font, fullText1, 0.1f, sound, soundBuffer, yOffset);
-    yOffset += 40.0f;
+    yOffset += 60.0f;
     string fullText2 = "his memories lost to the shadows of uncertainty   \n";
     displayTextLetterByLetter(window, font, fullText2, 0.1f, sound, soundBuffer, yOffset);
-    yOffset += 40.0f;
+    yOffset += 60.0f;
     string fullText3 = "in a house that seems to be his doom  \n";
     displayTextLetterByLetter(window, font, fullText3, 0.1f, sound, soundBuffer, yOffset);
 
@@ -517,14 +529,15 @@ int main()
                 sound2Played = true;
                 sound2Timer.restart();
             }
-
+            yOffset = 100.0f;
             // Check if 7 seconds have passed since sound2 started playing
             if (sound2Timer.getElapsedTime().asSeconds() >= 7 && !transitionComplete) {
                 // Call the transition function with the transition text
                 vector<string> transitionTexts = {
                     "Outside the woods stretched endlessly into the night  ",
                     "the whispers of the dark calling to him  ",
-                    "assuring him that the threats he sensed had indeed arrived  "
+                    "assuring him that the threats he sensed ",
+                    "had indeed arrived   "
                 };
 
                 displayTransition(window, font, soundBuffer, sound, transitionTexts, yOffset);
@@ -572,10 +585,11 @@ void Game_Play(RenderWindow& window)
     //obstacles
     Texture ob1tex, ob2tex, ob3tex, ob4tex, ob5tex;
     ob1tex.loadFromFile("ob1.png");
-    ob2tex.loadFromFile("spikes_1.png");
+    ob2tex.loadFromFile("blade_2.png");
     ob3tex.loadFromFile("spike2.png");
     ob4tex.loadFromFile("spike1.png");
-    ob5tex.loadFromFile("blade_2.png");
+    ob5tex.loadFromFile("blade_3.png");
+
 
     // Initialize obstacle sprites
     Sprite ob1[9], ob2[9], ob3[9], ob4[9], ob5[9];
@@ -584,7 +598,7 @@ void Game_Play(RenderWindow& window)
         ob2[i].setScale(0.145, 0.2);
         int randomX = static_cast<float>(rand() % (5100 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 600);
 
-        ob2[i].setPosition(randomX, 765);
+        ob2[i].setPosition(randomX, 750);
     }
     for (int i = 0; i < 4; i++) {
         ob1[i].setTexture(ob1tex);
@@ -597,7 +611,7 @@ void Game_Play(RenderWindow& window)
     for (int i = 0; i < 5; i++) {
         ob3[i].setTexture(ob3tex);
         ob3[i].setScale(0.08, 0.1);
-        int randomX = static_cast<float>(rand() % (5800 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+        int randomX = static_cast<float>(rand() % (5600 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
         ob3[i].setPosition(randomX, 765);
 
         ob4[i].setTexture(ob4tex);
@@ -606,13 +620,42 @@ void Game_Play(RenderWindow& window)
         ob4[i].setPosition(randomX, 750);
     }
 
+    for (int i = 0; i < 9; i++) {
+        ob5[i].setTexture(ob5tex);
+        ob5[i].setScale(0.145, 0.2);
+        int randomX = static_cast<float>(rand() % (3400 - static_cast<int>(ob5[i].getGlobalBounds().width))) + ((i + 1) * 600);
+
+        ob5[i].setPosition(randomX, 765);
+    }
+
     RectangleShape rec(Vector2f(28.f, 210.f));
     rec.setFillColor(Color::White);
 
+    //healthbar
+    Texture healthtex, redtex;
+    healthtex.loadFromFile("healthbar.png");
+    redtex.loadFromFile("blood_red_bar.png");
+    Sprite hpp;
+    hpp.setTexture(redtex);
+    hpp.setScale(Vector2f(1.8f, 1.f));
+    hpp.setPosition(Vector2f(200.f, 200.f));
 
-    //pause menu
+    Font fonthp;
+    fonthp.loadFromFile("font text.ttf");
+    RectangleShape hpbar(Vector2f(28.f, 210.f));
+    hpbar.setSize(Vector2f(525.f, 30.f));
 
-     // Load the font
+    hpbar.setFillColor(Color(25, 25, 25, 200));
+
+    Text phealth;
+    phealth.setFont(fonthp);
+    phealth.setString("Health");
+    phealth.setCharacterSize(50);
+    phealth.setFillColor(Color::Red);
+    phealth.setPosition(20.f, 110.f);
+
+
+    // Load the font
     Font font;
     font.loadFromFile("font text.ttf");
     Font font1;
@@ -672,11 +715,11 @@ void Game_Play(RenderWindow& window)
 
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(6450.f, 750.f);
+    rectangle.setPosition(6500.f, 750.f);
     rectangle.setFillColor(sf::Color::White); // Fill color
 
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
-    reclevel3.setPosition(6470.f, 750.f);
+    reclevel3.setPosition(6600.f, 750.f);
     reclevel3.setFillColor(sf::Color::Red); // Fill color
 
     // Sprite ob1(ob1tex);
@@ -700,7 +743,7 @@ void Game_Play(RenderWindow& window)
     Sprite letter2Sprite(letter2Texture);
     // Load the picture texture
     Texture letter3Texture;
-    if (!letter3Texture.loadFromFile("thirdLetter.png")) {
+    if (!letter3Texture.loadFromFile("thirdLetterNew.png")) {
         cerr << "Failed to load picture texture\n";
         return;
     }
@@ -950,6 +993,7 @@ void Game_Play(RenderWindow& window)
                     }
 
                     rectangle.setPosition(9000.f, 750.f);
+
                     if (isColliding(rec, ob4[i])) {
                         auto currentTime = std::chrono::steady_clock::now();
                         auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
@@ -976,9 +1020,35 @@ void Game_Play(RenderWindow& window)
             else {
                 reclevel3.setPosition(9000.f, 750.f);
                 //handle enemies and letters in level3
+                for (int i = 0; i < 9; ++i) {
+                    if (isColliding(rec, ob5[i])) {
+                        auto currentTime = std::chrono::steady_clock::now();
+                        auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
+                        if (i == 5) {
+                            continue;
+                        }
+                        // Check if enough time has passed since the last collision
+                        if (timeSinceLastCollision >= delayDuration) {
 
+                            health--;
+                            cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
+                            lastCollisionOb2[i].time = currentTime; // Update last collision time
+                        }
+
+                    }
+                }
             }
         }
+        if (health >= 0) {
+            hpp.setScale(Vector2f((1.8 * (static_cast<float>(health) / 20)), 1.f));
+        }
+
         if (!isPaused) {
             sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
             bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
@@ -1177,19 +1247,19 @@ void Game_Play(RenderWindow& window)
             }
 
 
-            if (Keyboard::isKeyPressed(Keyboard::D))
+            if (Keyboard::isKeyPressed(Keyboard::Right))
             {
                 player1.sprite.setTexture(playerTexture[0]);
                 player1.move_x = 0.25;
 
             }
-            if (Keyboard::isKeyPressed(Keyboard::A))
+            if (Keyboard::isKeyPressed(Keyboard::Left))
             {
                 player1.sprite.setTexture(playerTexture[0]);
                 player1.move_x = -0.25;
             }
 
-            if (Keyboard::isKeyPressed(Keyboard::W))
+            if (Keyboard::isKeyPressed(Keyboard::Space))
             {
                 if (player1.onground)
                 {
@@ -1287,15 +1357,15 @@ void Game_Play(RenderWindow& window)
                 cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
             }
             // Update the view only if the player reaches the edges of the window
-            if (player1.sprite.getPosition().x > cam.getCenter().x + 350) {
+            if (player1.sprite.getPosition().x > cam.getCenter().x + 50) {
                 cam.move(5, 0); // Move the view to the right
             }
             else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
                 cam.move(-5, 0); // Move the view to the left
             }
-            /* if (timer2>4.0) {
-                 showLetter = true;
-             }*/
+            hpp.setPosition(cam.getCenter().x - 595, cam.getCenter().y - 360.5);
+            hpbar.setPosition(cam.getCenter().x - 590, cam.getCenter().y - 356.5);
+            phealth.setPosition(cam.getCenter().x - 590, cam.getCenter().y - 410);
 
             if (attack) {
                 player1.update(timer, 3);
@@ -1313,6 +1383,10 @@ void Game_Play(RenderWindow& window)
 
             window.clear();
             window.draw(background);
+            window.draw(hpbar);
+            window.draw(phealth);
+            window.draw(hpp);
+
             //window.draw(rec);
 
           //  window.draw(player1.sprite);
@@ -1379,6 +1453,9 @@ void Game_Play(RenderWindow& window)
                 }
                 else {
                     // handle enemies draw
+                    for (int i = 0; i < 9; i++) {
+                        window.draw(ob5[i]);
+                    }
                 }
             }
 
