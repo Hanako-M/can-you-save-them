@@ -14,20 +14,7 @@ using namespace sf;
 float const ground = 600;
 float const right_wall = 1850;
 float const left_wall = 0;
-int health = 20;
-int healthwolf = 30;
-int healthcent = 20;
-int healthdemon = 25;
-int healthmud = 15;
-bool mudhurt = false;
-bool mudd = true;
-bool deaddem = false;
-float deat = 0.0f;
-bool fading = false;
-float fadeDuration = 3.0f;
-bool faded = false;
-
-bool wolfdamage = false;
+int health = 50;
 
 static const float view_height = 800;
 struct player
@@ -130,8 +117,8 @@ void Level3Transition(Sprite& background, player& player1, const Vector2f& origi
 
 
 void displayTextLetterByLetter(RenderWindow& window, const Font& font, const string& fullText, float delay, Sound& sound, const SoundBuffer& soundBuffer, float yOffset) {
-    Text text("", font, 36);
-    text.setPosition(0, yOffset);
+    Text text("", font, 45);
+    text.setPosition(75, yOffset);
     string displayedText = "";
     unsigned int charIndex = 0;
     Clock clock;
@@ -145,8 +132,8 @@ void displayTextLetterByLetter(RenderWindow& window, const Font& font, const str
         }
 
         if (fullText[charIndex] == '\n') {
-            yOffset += 40.0f; // Move to the next line
-            text.setPosition(0, yOffset);
+            yOffset += 60.0f; // Move to the next line
+            text.setPosition(20, yOffset);
             charIndex++; // Skip the newline character
             continue;
         }
@@ -163,36 +150,6 @@ void displayTextLetterByLetter(RenderWindow& window, const Font& font, const str
     }
     sound.stop();
 }
-void fadeSprite(sf::Sprite& sprite, sf::Clock clock, float fadeDuration) {
-    static bool fading = false;
-    static bool faded = false;
-    static sf::Time elapsed;
-
-    if (!fading) {
-        fading = true;
-        elapsed = clock.getElapsedTime();
-    }
-
-    // Calculate the alpha value based on elapsed time and fade duration
-    float alpha = 255 * (1 - (clock.getElapsedTime().asSeconds() - elapsed.asSeconds()) / fadeDuration);
-    if (alpha <= 0) {
-        alpha = 0; // Ensure alpha doesn't go below 0
-        fading = false;
-        faded = true;
-    }
-    if (faded)
-
-        sprite.setScale(0, 0);
-
-    sf::Color color = sprite.getColor();
-    color.a = static_cast<sf::Uint8>(alpha);
-    sprite.setColor(color);
-
-    if (alpha == 0) {
-        fading = false;
-    }
-}
-
 void resizedview(const sf::RenderWindow& window, sf::View& view) {
 
     float ratio = float(window.getSize().x) / float(window.getSize().y);
@@ -213,7 +170,7 @@ void handleLevelTransition(Sprite& background, player& player1, const Vector2f& 
     levelTransitionCompleted = true;
 }
 void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer& soundBuffer, Sound& sound, const vector<string>& transitionTexts, float yOffset) {
-    RectangleShape transitionRect(Vector2f(1200, 800));
+    RectangleShape transitionRect(Vector2f(1634, 1080));
     transitionRect.setFillColor(Color::Black);
     float transitionAlpha = 0.0f; // Initial transparency of the transition rectangle
 
@@ -238,11 +195,11 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
     // Display transition theme text letter by letter
     for (const auto& transitionText : transitionTexts) {
         displayTextLetterByLetter(window, font, transitionText, 0.1f, sound, soundBuffer, yOffset);
-        yOffset += 40.0f; // Move to the next line
+        yOffset += 60.0f; // Move to the next line
     }
 
     // Reset yOffset for the reverse transition
-    yOffset = 0.0f;
+    yOffset = 70.0f;
 
     // Gradually fade back out
     while (transitionAlpha < 255) {
@@ -261,6 +218,7 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
         window.display();
     }
 }
+void Game_Play(RenderWindow& window);
 
 struct Button {
     sf::Text text;
@@ -312,7 +270,7 @@ bool isColliding(const RectangleShape& sprite1, const Sprite& sprite2) {
 
 
 struct LastCollisionTime {
-    std::chrono::steady_clock::time_point time;
+    chrono::steady_clock::time_point time;
 };
 
 void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, bool& transitionTriggered, View cam) {
@@ -322,7 +280,7 @@ void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, boo
     transitionTriggered = 0;
     // Only execute if the transition has not been triggered yet
     if (!transitionTriggered) {
-        while (transitionAlpha < 255 && !spacePressed) {
+        while (transitionAlpha <= 1 && !spacePressed) {
             Event event2;
             while (window.pollEvent(event2)) {
                 if (event2.type == Event::Closed)
@@ -331,12 +289,12 @@ void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, boo
                     spacePressed = true; // Set flag to true when space is pressed
             }
 
-            transitionAlpha += 3.0f; // Increment alpha gradually
+            transitionAlpha++; // Increment alpha gradually
 
-            transitionSprite.setColor(Color(255, 255, 255, static_cast <Uint8>(transitionAlpha)));
-            transitionSprite.setPosition(cam.getCenter());
+            //transitionSprite.setColor(Color(255, 255, 255, static_cast <Uint8>(transitionAlpha)));
+            transitionSprite.setPosition(cam.getCenter().x - 570, cam.getCenter().y - 430.5);
             transitionSprite.setOrigin(0, 0);
-            window.clear(); // Clear the window before drawing
+            //  window.clear(); // Clear the window before drawing
             window.draw(transitionSprite); // Draw the transition sprite
             window.display(); // Display the window
             cout << "letter is ready to display";
@@ -355,7 +313,7 @@ void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, boo
         }
     }
 }
-void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, const Font& font) {
+void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, const Font& font, Sound sound) {
     // Create a sprite for the splash screen
     Sprite splash(splashTexture);
     splash.setScale(window.getSize().x / static_cast<float>(splashTexture.getSize().x),
@@ -367,62 +325,47 @@ void displaySplashScreen(RenderWindow& window, const Texture& splashTexture, con
     titleText.setString("CAN YOU SAVE THEM?");
     titleText.setCharacterSize(80);
     titleText.setFillColor(Color::White);
-    titleText.setPosition(400.f, 550.f);
+    titleText.setPosition(280.f, 760.f);
 
     Text press;
     press.setFont(font);
     press.setString("Press SPACE to continue....");
     press.setCharacterSize(25);
     press.setFillColor(Color::White);
-    press.setPosition(410.f, 650.f);
+    press.setPosition(290.f, 880.f);
+    vector<string> guidtext = {
+
+    " controls: \n press[x][z] to attack \n press[->] to move right \n press[<-] to move left \n press[space] to jump" };
+
+    Text guide;
+    guide.setFont(font);
+    guide.setString("controls: \n\n press [x] [z] to attack \n press [->] to move right \n press [<-] to move left \n press [space] to jump \n press [esc] to pause");
+    guide.setCharacterSize(24);
+    guide.setFillColor(Color::White);
+    guide.setPosition(1360.f, 760.f);
+
 
     // Draw the splash screen elements
+    sound.play();
     window.draw(splash);
     window.draw(titleText);
     window.draw(press);
+    window.draw(guide);
     window.display();
-}
-void resizedview(const sf::RenderWindow& window, sf::View& view);
-void Game_Play(RenderWindow& window);
-// Function to handle skipping intro and proceeding to splash screen and sound three
-void skipIntro(RenderWindow& window, const Texture& splashTexture, const Font& font) {
-    bool splashScreenShown = false;
     bool spacePressed = false;
-    bool gameStarted = false;
-    SoundBuffer soundBuffer;
-
-    if (!soundBuffer.loadFromFile("out.wav")) {
-        cerr << "Failed to load sound!" << endl;
-        return;
-    }
-    Sound sound;
-    sound.setBuffer(soundBuffer);
-    sound.play();
-
-    while (sound.getStatus() == Sound::Playing) {
+    while (!spacePressed) {
         Event event;
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
                 window.close();
-            else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space) {
-                // Exit the loop if spacebar is pressed
-                sound.stop();  // Stop the sound
-                gameStarted = true;
-            }
-        }
-
-        if (!splashScreenShown) {
-            // Display the splash screen while sound is playing
-            displaySplashScreen(window, splashTexture, font);
-            splashScreenShown = true;
-        }
-
-        if (gameStarted) {
-            Game_Play(window); // Start the game
+            else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space)
+                spacePressed = true; // Set flag to true when space is pressed
         }
     }
+    if (spacePressed) Game_Play(window);
 }
-LastCollisionTime demontime;
+void resizedview(const sf::RenderWindow& window, sf::View& view);
+
 int main()
 {
     // The intro window
@@ -449,7 +392,7 @@ int main()
 
     // Load background image
     Texture backThemeTexture;
-    if (!backThemeTexture.loadFromFile("back.png")) {
+    if (!backThemeTexture.loadFromFile("intro town.png")) {
         cerr << "Failed to load haunted house image!" << endl;
         return -1;
     }
@@ -474,13 +417,13 @@ int main()
     backTheme_buffer.setScale(scaleX, scaleY);
 
     // Display intro text letter by letter with sound
-    float yOffset = 0.0f;
+    float yOffset = 100.0f;
     string fullText1 = "It was a terrifying night when Ori woke up   \n";
     displayTextLetterByLetter(window, font, fullText1, 0.1f, sound, soundBuffer, yOffset);
-    yOffset += 40.0f;
+    yOffset += 60.0f;
     string fullText2 = "his memories lost to the shadows of uncertainty   \n";
     displayTextLetterByLetter(window, font, fullText2, 0.1f, sound, soundBuffer, yOffset);
-    yOffset += 40.0f;
+    yOffset += 60.0f;
     string fullText3 = "in a house that seems to be his doom  \n";
     displayTextLetterByLetter(window, font, fullText3, 0.1f, sound, soundBuffer, yOffset);
 
@@ -492,12 +435,20 @@ int main()
     }
     Sound sound2;
     sound2.setBuffer(soundBuffer2);
+
+    SoundBuffer soundBuffer3;
+    if (!soundBuffer3.loadFromFile("out.wav")) {
+        cerr << "Failed to load sound!" << endl;
+        return -1;
+    }
+    Sound sound3;
+    sound3.setBuffer(soundBuffer3);
     // Track whether the second sound has been played
     bool sound2Played = false;
     bool sound3Played = false;
 
     // Set up the second sound
-    SoundBuffer soundBuffer3;
+   // SoundBuffer soundBuffer3;
 
     // Boolean flags to track game state
     bool introComplete = false;
@@ -550,112 +501,82 @@ int main()
         }
 
         if (introSkipped) {
-            skipIntro(window, splashTexture, font1);
+            displaySplashScreen(window, splashTexture, font1, sound3);
+            // skipIntro(window, splashTexture, font1);
         }
-        // Move backgrounds horizontally
-        float speed = 1.0f; // Adjust this value to change the speed of motion
-        backTheme_1.move(-speed, 0);
-        backTheme_2.move(-speed, 0);
-        backTheme_buffer.move(-speed, 0);
+        else {
+            // Move backgrounds horizontally
+            float speed = 1.0f; // Adjust this value to change the speed of motion
+            backTheme_1.move(-speed, 0);
+            backTheme_2.move(-speed, 0);
+            backTheme_buffer.move(-speed, 0);
 
-        // If backTheme1 moves out of the window, move it to the right of backTheme2
-        if (backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width < 0)
-            backTheme_1.setPosition(backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width - 1, 0);
+            // If backTheme1 moves out of the window, move it to the right of backTheme2
+            if (backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width < 0)
+                backTheme_1.setPosition(backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width - 1, 0);
 
-        // If backTheme2 moves out of the window, move it to the right of backTheme1
-        if (backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width < 0)
-            backTheme_2.setPosition(backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width - 1, 0);
+            // If backTheme2 moves out of the window, move it to the right of backTheme1
+            if (backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width < 0)
+                backTheme_2.setPosition(backTheme_1.getPosition().x + backTheme_1.getGlobalBounds().width - 1, 0);
 
-        // If buffer sprite moves out of the window, move it to the right of backTheme2
-        if (backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width < 0)
-            backTheme_buffer.setPosition(backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width - 1, 0);
+            // If buffer sprite moves out of the window, move it to the right of backTheme2
+            if (backTheme_buffer.getPosition().x + backTheme_buffer.getGlobalBounds().width < 0)
+                backTheme_buffer.setPosition(backTheme_2.getPosition().x + backTheme_2.getGlobalBounds().width - 1, 0);
 
-        // Play the second sound when backgrounds start to appear
-        if ((backTheme_1.getPosition().x >= 0 || backTheme_2.getPosition().x >= 0) && !sound2Played) {
-            sound2.play();
-            sound2Played = true;
-            sound2Timer.restart();
-        }
-
-        // Check if 7 seconds have passed since sound2 started playing
-        if (sound2Timer.getElapsedTime().asSeconds() >= 7 && !transitionComplete) {
-            // Call the transition function with the transition text
-            vector<string> transitionTexts = {
-                "Outside the woods stretched endlessly into the night  ",
-                "the whispers of the dark calling to him  ",
-                "assuring him that the threats he sensed had indeed arrived  "
-            };
-
-            displayTransition(window, font, soundBuffer, sound, transitionTexts, yOffset);
-            transitionComplete = true;
-            transitionTimer.restart(); // Transition is complete
-        }
-        // Check if 12 seconds have passed since sound2 started playing and the first transition is complete
-        if (transitionComplete && !secondTransitionComplete && transitionTimer.getElapsedTime().asSeconds() >= 5) {
-            // Call the transition function with the transition text for the second transition
-            vector<string> secondTransitionTexts = {
-                "Can you defy the odds alongside Ori  ",
-                "guiding him to find what brought him here  ",
-            };
-
-            displayTransition(window, font, soundBuffer, sound, secondTransitionTexts, yOffset);
-            secondTransitionComplete = true; // Second transition is complete
-            outroTimer.restart(); // Start the outro timer
-            outroStarted = true; // Set the outro flag
-        }
-        // Check if 5 seconds have passed since the last transition
-        if (outroStarted && outroTimer.getElapsedTime().asSeconds() >= 5) {
-            sound2.stop();
-            if (!soundBuffer3.loadFromFile("out.wav")) {
-                cerr << "Failed to load sound!" << endl;
-                return -1;
+            // Play the second sound when backgrounds start to appear
+            if ((backTheme_1.getPosition().x >= 0 || backTheme_2.getPosition().x >= 0) && !sound2Played) {
+                sound2.play();
+                sound2Played = true;
+                sound2Timer.restart();
             }
-            Sound sound3;
-            sound3.setBuffer(soundBuffer3);
-            sound3.play();
-            sound3Played = true;
-            if (sound3Played) {
+            yOffset = 100.0f;
+            // Check if 7 seconds have passed since sound2 started playing
+            if (sound2Timer.getElapsedTime().asSeconds() >= 7 && !transitionComplete) {
+                // Call the transition function with the transition text
+                vector<string> transitionTexts = {
+                    "Outside the woods stretched endlessly into the night  ",
+                    "the whispers of the dark calling to him  ",
+                    "assuring him that the threats he sensed ",
+                    "had indeed arrived   "
+                };
 
-                // Display the splash screen while sound3 is playing
-                displaySplashScreen(window, splashTexture, font1);
+                displayTransition(window, font, soundBuffer, sound, transitionTexts, yOffset);
+                transitionComplete = true;
+                transitionTimer.restart(); // Transition is complete
             }
+            // Check if 12 seconds have passed since sound2 started playing and the first transition is complete
+            if (transitionComplete && !secondTransitionComplete && transitionTimer.getElapsedTime().asSeconds() >= 5) {
+                // Call the transition function with the transition text for the second transition
+                vector<string> secondTransitionTexts = {
+                    "Can you defy the odds alongside Ori  ",
+                    "guiding him to find what brought him here  ",
+                };
 
-            // Main loop for handling events while sound3 is playing and splash screen is displayed
-            while (sound3.getStatus() == Sound::Playing) {
-                Event event;
-                while (window.pollEvent(event)) {
-                    if (event.type == Event::Closed)
-                        window.close();
-                    else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space) {
-                        // Exit the loop if spacebar is pressed
-                        sound3.stop();  // Stop the sound
-                        pagenum = 2;
-                    }
+                displayTransition(window, font, soundBuffer, sound, secondTransitionTexts, yOffset);
+                secondTransitionComplete = true; // Second transition is complete
+                outroTimer.restart(); // Start the outro timer
+                outroStarted = true; // Set the outro flag
+            }
+            // Check if 5 seconds have passed since the last transition
+            if (outroStarted && outroTimer.getElapsedTime().asSeconds() >= 5) {
+                sound2.stop();
+                sound3Played = true;
+                if (sound3Played) {
+
+                    // Display the splash screen while sound3 is playing
+                    displaySplashScreen(window, splashTexture, font1, sound3);
                 }
-
             }
 
-            if (pagenum == 2)
-            {
-
-                Game_Play(window);
-            }
-
+            // Draw backgrounds and transition rectangle
+            window.clear();
+            window.draw(backTheme_1);
+            window.draw(backTheme_2);
+            window.draw(backTheme_buffer);
         }
-
-
-
-        // Draw backgrounds and transition rectangle
-        window.clear();
-        window.draw(backTheme_1);
-        window.draw(backTheme_2);
-        window.draw(backTheme_buffer);
-
-
 
         window.display();
     }
-
 
     return 0;
 }
@@ -664,10 +585,11 @@ void Game_Play(RenderWindow& window)
     //obstacles
     Texture ob1tex, ob2tex, ob3tex, ob4tex, ob5tex;
     ob1tex.loadFromFile("ob1.png");
-    ob2tex.loadFromFile("spikes_1.png");
+    ob2tex.loadFromFile("blade_2.png");
     ob3tex.loadFromFile("spike2.png");
     ob4tex.loadFromFile("spike1.png");
-    ob5tex.loadFromFile("blade_2.png");
+    ob5tex.loadFromFile("blade_3.png");
+
 
     // Initialize obstacle sprites
     Sprite ob1[9], ob2[9], ob3[9], ob4[9], ob5[9];
@@ -676,7 +598,7 @@ void Game_Play(RenderWindow& window)
         ob2[i].setScale(0.145, 0.2);
         int randomX = static_cast<float>(rand() % (5100 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 600);
 
-        ob2[i].setPosition(randomX, 765);
+        ob2[i].setPosition(randomX, 750);
     }
     for (int i = 0; i < 4; i++) {
         ob1[i].setTexture(ob1tex);
@@ -689,7 +611,7 @@ void Game_Play(RenderWindow& window)
     for (int i = 0; i < 5; i++) {
         ob3[i].setTexture(ob3tex);
         ob3[i].setScale(0.08, 0.1);
-        int randomX = static_cast<float>(rand() % (5800 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+        int randomX = static_cast<float>(rand() % (5600 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
         ob3[i].setPosition(randomX, 765);
 
         ob4[i].setTexture(ob4tex);
@@ -698,13 +620,42 @@ void Game_Play(RenderWindow& window)
         ob4[i].setPosition(randomX, 750);
     }
 
+    for (int i = 0; i < 9; i++) {
+        ob5[i].setTexture(ob5tex);
+        ob5[i].setScale(0.145, 0.2);
+        int randomX = static_cast<float>(rand() % (3400 - static_cast<int>(ob5[i].getGlobalBounds().width))) + ((i + 1) * 600);
+
+        ob5[i].setPosition(randomX, 765);
+    }
+
     RectangleShape rec(Vector2f(28.f, 210.f));
     rec.setFillColor(Color::White);
 
+    //healthbar
+    Texture healthtex, redtex;
+    healthtex.loadFromFile("healthbar.png");
+    redtex.loadFromFile("blood_red_bar.png");
+    Sprite hpp;
+    hpp.setTexture(redtex);
+    hpp.setScale(Vector2f(1.8f, 1.f));
+    hpp.setPosition(Vector2f(200.f, 200.f));
 
-    //pause menu
+    Font fonthp;
+    fonthp.loadFromFile("font text.ttf");
+    RectangleShape hpbar(Vector2f(28.f, 210.f));
+    hpbar.setSize(Vector2f(525.f, 30.f));
 
-     // Load the font
+    hpbar.setFillColor(Color(25, 25, 25, 200));
+
+    Text phealth;
+    phealth.setFont(fonthp);
+    phealth.setString("Health");
+    phealth.setCharacterSize(50);
+    phealth.setFillColor(Color::Red);
+    phealth.setPosition(20.f, 110.f);
+
+
+    // Load the font
     Font font;
     font.loadFromFile("font text.ttf");
     Font font1;
@@ -764,11 +715,11 @@ void Game_Play(RenderWindow& window)
 
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(6450.f, 750.f);
+    rectangle.setPosition(6500.f, 750.f);
     rectangle.setFillColor(sf::Color::White); // Fill color
 
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
-    reclevel3.setPosition(6470.f, 750.f);
+    reclevel3.setPosition(6600.f, 750.f);
     reclevel3.setFillColor(sf::Color::Red); // Fill color
 
     // Sprite ob1(ob1tex);
@@ -783,8 +734,33 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite letter1Sprite(letter1Texture);
+    // Load the picture texture
+    Texture letter2Texture;
+    if (!letter2Texture.loadFromFile("secondLetter.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite letter2Sprite(letter2Texture);
+    // Load the picture texture
+    Texture letter3Texture;
+    if (!letter3Texture.loadFromFile("thirdLetterNew.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite letter3Sprite(letter3Texture);
+    /*SoundBuffer soundBuffer;
+    if (!soundBuffer.loadFromFile("main_Sound.wav")){
+        cerr << "Failed to load sound!" << endl;
 
-    Clock death;
+    }
+    Sound sound;
+    sound.setBuffer(soundBuffer);*/
+
+
+
+    //RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
+    //rectangle.setPosition(6400.f, 800.f); // Position (x=300, y=200)
+    //rectangle.setFillColor(sf::Color::White); // Fill color
 
 
     RectangleShape pl(Vector2f(50.f, 50.f)); // Create a rectangle shape
@@ -794,10 +770,6 @@ void Game_Play(RenderWindow& window)
     RectangleShape wol(Vector2f(50.f, 50.f)); // Create a rectangle shape
     wol.setFillColor(sf::Color::Blue); // Set its color
     wol.setPosition(50.f, 300.f); //
-
-    RectangleShape dem(Vector2f(50.f, 50.f)); // Create a rectangle shape
-    dem.setFillColor(sf::Color::Blue); // Set its color
-    dem.setPosition(50.f, 300.f); //
 
     Sprite wolf;
     setupSprite(wolf, 3500.f, 670.f, 2.5f, 2.5f, 128 / 2, 128 / 2);
@@ -821,7 +793,7 @@ void Game_Play(RenderWindow& window)
     loadTextureAndRect(wolfdeadtexture, rectsourcewolfdead, "Dead.png", 128, 128);
 
     Sprite centipede;
-    setupSprite(centipede, 2700.f, 750.f, 2.0f, 2.0f, 72 / 2, 72 / 2);
+    setupSprite(centipede, 1000.f, 750.f, 2.0f, 2.0f, 72 / 2, 72 / 2);
 
     Texture Centipedewalktexture;
     IntRect rectsourcecentwalk;
@@ -850,16 +822,8 @@ void Game_Play(RenderWindow& window)
     IntRect rectdemonattack;
     loadTextureAndRect(demonattacktext, rectdemonattack, "cacodemon_attack.png", 65, 65);
 
-    Texture demonhurttext;
-    IntRect rectdemonhurt;
-    loadTextureAndRect(demonhurttext, rectdemonhurt, "cacodemon-hurt.png", 65, 65);
-    Texture demondeadtext;
-    IntRect rectdemondead;
-    loadTextureAndRect(demondeadtext, rectdemondead, "cacodemon_dead.png", 65, 65);
-
-
     Sprite mud;
-    setupSprite(mud, 800.f, 760.f, 2.0f, 2.0f, 63 / 2, 63 / 2);
+    setupSprite(mud, 670.f, 760.f, 2.0f, 2.0f, 63 / 2, 63 / 2);
     Texture mudtext;
     IntRect rectmud;
     loadTextureAndRect(mudtext, rectmud, "spr_enemy_mud_strip8.png", 63, 63);
@@ -890,10 +854,10 @@ void Game_Play(RenderWindow& window)
     float timer2 = 0.0f;
 
 
-    float wolfspeed = -2.5f;
+    float wolfspeed = -2.3f;
     float centspeed = -2.8f;
     float demonspeed = 2.1f;
-    bool continueanimation = true;
+
     bool wolfwalking = false;
     bool wolfattacking = false;
     bool wolfhurting = false;
@@ -919,7 +883,7 @@ void Game_Play(RenderWindow& window)
     LastCollisionTime lastCollisionOb2[9]; // Store last collision time for ob2
 
     // Define the delay duration (e.g., 2 seconds)
-    const std::chrono::seconds delayDuration(3);
+    const std::chrono::seconds delayDuration(1);
 
 
     bool transitionTriggered = false;
@@ -927,6 +891,7 @@ void Game_Play(RenderWindow& window)
     while (window.isOpen())
     {
         // sound.play();
+        // sound.setLoop(true);
         Event event;
         //cam.setCenter(Vector2f(player1.sprite.getPosition().x + 600, 500));
         window.setView(cam);
@@ -955,8 +920,8 @@ void Game_Play(RenderWindow& window)
 
         bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
-
         if (player1.sprite.getGlobalBounds().intersects(reclevel3.getGlobalBounds())) {
+            displayLetterTransition(window, letter3Sprite, transitionTriggered, cam);
             Level3Transition(background, player1, playerPosition, level3texture);
 
         }
@@ -1028,6 +993,7 @@ void Game_Play(RenderWindow& window)
                     }
 
                     rectangle.setPosition(9000.f, 750.f);
+
                     if (isColliding(rec, ob4[i])) {
                         auto currentTime = std::chrono::steady_clock::now();
                         auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
@@ -1054,9 +1020,35 @@ void Game_Play(RenderWindow& window)
             else {
                 reclevel3.setPosition(9000.f, 750.f);
                 //handle enemies and letters in level3
+                for (int i = 0; i < 9; ++i) {
+                    if (isColliding(rec, ob5[i])) {
+                        auto currentTime = std::chrono::steady_clock::now();
+                        auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
+                        if (i == 5) {
+                            continue;
+                        }
+                        // Check if enough time has passed since the last collision
+                        if (timeSinceLastCollision >= delayDuration) {
 
+                            health--;
+                            cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
+                            lastCollisionOb2[i].time = currentTime; // Update last collision time
+                        }
+
+                    }
+                }
             }
         }
+        if (health >= 0) {
+            hpp.setScale(Vector2f((1.8 * (static_cast<float>(health) / 50)), 1.f));
+        }
+
         if (!isPaused) {
             sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
             bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
@@ -1073,19 +1065,19 @@ void Game_Play(RenderWindow& window)
                 // If collision occurs with the player, make the wolf attacking
                 wolfwalking = false;
                 wolfattacking = true;
-                wolf.setScale(-2.2f, 2.2f);
+
             }
 
-            if ((wol.getPosition().x < pl.getPosition().x) && (wolfwalking = true) || (wol.getPosition().x <= 3000.f)) {
+            if ((wol.getPosition().x < pl.getPosition().x) && (wolfwalking = true)) {
                 wolfwalking = true;
                 wolfattacking = false;
-                wolf.setScale(2.2f, 2.2f);
+                wolf.setScale(-2.2f, 2.2f);
                 wolf.move(-wolfspeed, 0.0f);
             }
             if ((wol.getPosition().x > pl.getPosition().x) && (wolfwalking = true)) {
                 wolfattacking = false;
                 wolfwalking = true;
-                wolf.setScale(-2.2f, 2.2f);
+                wolf.setScale(2.2f, 2.2f);
                 wolf.move(wolfspeed, 0.0f);
             }
 
@@ -1101,13 +1093,12 @@ void Game_Play(RenderWindow& window)
                 centattacking = true;
 
             }
-            if ((centipede.getPosition().x < pl.getPosition().x) && (centwalking = true) || (centipede.getPosition().x <= 2000.f)) {
+            if ((centipede.getPosition().x < pl.getPosition().x) && (centwalking = true)) {
                 centwalking = true;
                 centattacking = false;
                 centipede.setScale(-2.0f, 2.0f);
                 centipede.move(-centspeed, 0.0f);
             }
-
             if ((centipede.getPosition().x > pl.getPosition().x) && (centwalking = true)) {
                 centattacking = false;
                 centwalking = true;
@@ -1119,7 +1110,6 @@ void Game_Play(RenderWindow& window)
                 centattacking = true;
 
             }
-
             if ((demon.getPosition().x < pl.getPosition().x)) {
                 demon.move(demonspeed, 0.0f);
                 demonwalking = true;
@@ -1142,152 +1132,120 @@ void Game_Play(RenderWindow& window)
                 demon.setScale(2.5f, 2.5f);
             }
             timer2 += letterClock.restart().asSeconds();
-            if (continueanimation == true) {
 
 
-                if (clockenemy.getElapsedTime().asSeconds() > 0.1f) {
+            if (clockenemy.getElapsedTime().asSeconds() > 0.1f) {
 
-                    rectsourcewolfwalk.left += 128;
-                    if (rectsourcewolfwalk.left >= 896)
-                        rectsourcewolfwalk.left = 0;
+                rectsourcewolfwalk.left += 128;
+                if (rectsourcewolfwalk.left >= 896)
+                    rectsourcewolfwalk.left = 0;
 
-                    rectsourcewolfattack1.left += 128;
-                    if (rectsourcewolfattack1.left >= 640)
-                        rectsourcewolfattack1.left = 0;
-
-
-
-                    rectsourcewolfhurt.left += 128;
-                    if (rectsourcewolfhurt.left >= 256)
-                        rectsourcewolfhurt.left = 0;
-
-                    rectsourcewolfdead.left += 128;
-                    if (rectsourcewolfdead.left >= 256)
-                    {
-                        //  wolfdead = true;
-                        rectsourcewolfdead.left = 128;
-                    }
+                rectsourcewolfattack1.left += 128;
+                if (rectsourcewolfattack1.left >= 640)
+                    rectsourcewolfattack1.left = 0;
 
 
 
-                    rectsourcecentwalk.left += 72;
-                    if (rectsourcecentwalk.left >= 288)
-                        rectsourcecentwalk.left = 0;
+                rectsourcewolfhurt.left += 128;
+                if (rectsourcewolfhurt.left >= 256)
+                    rectsourcewolfhurt.left = 0;
 
-                    rectsourcecentattack.left += 72;
-                    if (rectsourcecentattack.left >= 432)
-                        rectsourcecentattack.left = 0;
-
-                    rectsourcecenthurt.left += 72;
-                    if (rectsourcecenthurt.left >= 144)
-                        rectsourcecenthurt.left = 0;
-
-                    rectsourcecentdead.left += 72;
-                    if (rectsourcecentdead.left >= 144) {
-                        //   centdead = true;
-                        rectsourcecentdead.left = 144;
-                    }
-
-                    rectdemonwalk.left += 65;
-                    if (rectdemonwalk.left >= 390)
-                        rectdemonwalk.left = 0;
-
-                    rectdemonattack.left += 65;
-                    if (rectdemonattack.left >= 390)
-                        rectdemonattack.left = 0;
-
-                    rectdemondead.left += 65;
-                    if (rectdemondead.left >= 512) {
-                        //  demondead = true;
-                        rectdemondead.left = 448;
-                    }
+                rectsourcewolfdead.left += 128;
+                if (rectsourcewolfdead.left >= 256)
+                    rectsourcewolfdead.left = 0;
 
 
 
-                    rectmud.left += 62;
-                    if (rectmud.left >= 495)
+                rectsourcecentwalk.left += 72;
+                if (rectsourcecentwalk.left >= 288)
+                    rectsourcecentwalk.left = 0;
 
-                        rectmud.left = 0;
+                rectsourcecentattack.left += 72;
+                if (rectsourcecentattack.left >= 432)
+                    rectsourcecentattack.left = 0;
 
+                rectsourcecenthurt.left += 72;
+                if (rectsourcecenthurt.left >= 144)
+                    rectsourcecenthurt.left = 0;
 
-                    rectmudhurt.left += 62;
-                    if (rectmudhurt.left >= 248)
-                        rectmudhurt.left = 0;
-                    // Set texture rectangles for both animations
+                rectsourcecentdead.left += 72;
+                if (rectsourcecentdead.left >= 144)
+                    rectsourcecentdead.left = 0;
 
-                    if (wolfwalking == true) {
-                        wolf.setTextureRect(rectsourcewolfwalk);
-                        wolf.setTexture(wolfwalktexture);
-                    }
+                rectdemonwalk.left += 65;
+                if (rectdemonwalk.left >= 390)
+                    rectdemonwalk.left = 0;
 
-                    if (wolfattacking == true) {
-                        wolf.setTextureRect(rectsourcewolfattack1);
-                        wolf.setTexture(wolfattack1texture);
+                rectdemonattack.left += 65;
+                if (rectdemonattack.left >= 390)
+                    rectdemonattack.left = 0;
 
-                    }
-                    //   wolfattack2.setTextureRect(rectsourcewolfattack2);
-                    if (wolfhurting == true) {
-                        wolf.setTexture(wolfhurttexture);
-                        wolf.setTextureRect(rectsourcewolfhurt);
-                    }
-
-                    if (healthwolf == 0) {
-                        wolf.setTexture(wolfdeadtexture);
-                        wolf.setTextureRect(rectsourcewolfdead);
-                    }
-                    if (centwalking == true) {
-                        centipede.setTexture(Centipedewalktexture);
-                        centipede.setTextureRect(rectsourcecentwalk);
-                    }
-
-                    if (centattacking == true) {
-                        centipede.setTexture(Centipedeattacktexture);
-                        centipede.setTextureRect(rectsourcecentattack);
-                    }
-                    if (wolfdamage == true) {
-                        centipede.setTexture(Centipedehurttexture);
-                        centipede.setTextureRect(rectsourcecenthurt);
-                    }
-                    if (healthcent == 0) {
-                        centipede.setTexture(Centipededeadtexture);
-                        centipede.setTextureRect(rectsourcecentdead);
-                    }
-                    if (demonwalking == true) {
-                        demon.setTexture(demonwalktext);
-                        demon.setTextureRect(rectdemonwalk);
-                    }
-                    if (demonattacking == true) {
-                        demon.setTexture(demonattacktext);
-                        demon.setTextureRect(rectdemonattack);
-                    }
-                    if (demonhurt == true) {
-                        demon.setTexture(demonhurttext);
-                        demon.setTextureRect(rectdemonhurt);
-                    }
-                    if (healthdemon == 0) {
-                        demon.setTexture(demondeadtext);
-                        demon.setTextureRect(rectdemondead);
-                    }
-                    if (mudd == true) {
-                        mud.setTexture(mudtext);
-                        mud.setTextureRect(rectmud);
-                    }
-                    if (wolfdamage == true && mudhurt == true) {
-                        mud.setTexture(mudtexthurt);
-                        mud.setTextureRect(rectmudhurt);
-                    }
-
-                    //   
-                      // 
+                rectmud.left += 62;
+                if (rectmud.left >= 495)
+                    rectmud.left = 0;
 
 
-                    clockenemy.restart();
+                rectmudhurt.left += 62;
+                if (rectmudhurt.left >= 248)
+                    rectmudhurt.left = 0;
+                // Set texture rectangles for both animations
+
+                if (wolfwalking == true) {
+                    wolf.setTextureRect(rectsourcewolfwalk);
+                    wolf.setTexture(wolfwalktexture);
                 }
+
+                if (wolfattacking == true) {
+                    wolf.setTextureRect(rectsourcewolfattack1);
+                    wolf.setTexture(wolfattack1texture);
+
+                }
+                //   wolfattack2.setTextureRect(rectsourcewolfattack2);
+                if (wolfhurting == true) {
+                    wolf.setTexture(wolfhurttexture);
+                    wolf.setTextureRect(rectsourcewolfhurt);
+                }
+
+                if (wolfdead == true) {
+                    wolf.setTexture(wolfdeadtexture);
+                    wolf.setTextureRect(rectsourcewolfdead);
+                }
+                if (centwalking == true) {
+                    centipede.setTexture(Centipedewalktexture);
+                    centipede.setTextureRect(rectsourcecentwalk);
+                }
+
+                if (centattacking == true) {
+                    centipede.setTexture(Centipedeattacktexture);
+                    centipede.setTextureRect(rectsourcecentattack);
+                }
+                if (centhurting == true) {
+                    centipede.setTexture(Centipedehurttexture);
+                    centipede.setTextureRect(rectsourcecenthurt);
+                }
+                if (centdead == true) {
+                    centipede.setTexture(Centipededeadtexture);
+                    centipede.setTextureRect(rectsourcecentdead);
+                }
+                if (demonwalking == true) {
+                    demon.setTexture(demonwalktext);
+                    demon.setTextureRect(rectdemonwalk);
+                }
+                if (demonattacking == true) {
+                    demon.setTexture(demonattacktext);
+                    demon.setTextureRect(rectdemonattack);
+                }
+
+
+                mud.setTexture(mudtext);
+                mud.setTextureRect(rectmud);
+                //   mud.setTexture(mudtexthurt);
+                  // mud.setTextureRect(rectmudhurt);
+
+
+                clockenemy.restart();
             }
-            // Handle level transition
-           /* if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
-                handleLevelTransition(background, player1, playerPosition, level2texture);
-            }*/
+
 
             if (Keyboard::isKeyPressed(Keyboard::Right))
             {
@@ -1301,7 +1259,7 @@ void Game_Play(RenderWindow& window)
                 player1.move_x = -0.25;
             }
 
-            if (Keyboard::isKeyPressed(Keyboard::Up))
+            if (Keyboard::isKeyPressed(Keyboard::Space))
             {
                 if (player1.onground)
                 {
@@ -1324,236 +1282,21 @@ void Game_Play(RenderWindow& window)
             }
 
 
-            if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(wol.getGlobalBounds()))) {
-                wolfdamage = true;
-                keyPressed = false;
+
+            if (Keyboard::isKeyPressed(Keyboard::X))
+            {
                 player1.sprite.setTexture(playerTexture[1]);
                 player1.move_x = 0.25;
-                if (healthwolf > 0)
-                    healthwolf--;
+                attack = 1;
             }
-            else  if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(centipede.getGlobalBounds()))) {
-                wolfdamage = true;
-                keyPressed = false;
+
+            if (Keyboard::isKeyPressed(Keyboard::Z))
+            {
                 player1.sprite.setTexture(playerTexture[1]);
-                player1.move_x = 0.25;
-                if (healthcent > 0)
-                    healthcent--;
+                player1.move_x = -0.25;
+                attack = 1;
             }
-            else if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(dem.getGlobalBounds()))) {
-                wolfdamage = true;
-                keyPressed = false;
-                player1.sprite.setTexture(playerTexture[1]);
-                player1.move_x = 0.25;
-                if (healthdemon > 0)
-                    healthdemon--;
-            }
-            else if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(mud.getGlobalBounds()))) {
-                wolfdamage = true;
-                mudhurt = true;
-                keyPressed = false;
-                player1.sprite.setTexture(playerTexture[1]);
-                player1.move_x = 0.25;
-                if (healthmud > 0)
-                    healthmud--;
-
-            }
-
-            if (wolfdamage == true && !Keyboard::isKeyPressed(Keyboard::X)) {
-                wolfdamage = false;
-            }
-
-            if (healthwolf == 0) {
-
-                fadeSprite(wolf, death, 3.f);
-                //         wolf.setScale(0, 0);
-            }
-            if (healthcent == 0) {
-                fadeSprite(centipede, death, 3.f);
-
-                //     centipede.setScale(0, 0);
-            }
-            if (healthdemon == 0) {
-                fadeSprite(demon, death, 3.f);
-                //   demon.setScale(0, 0);
-            }
-
-            if (demonattacking && healthdemon != 0) {
-
-                auto currentTime = chrono::steady_clock::now();
-                auto timeSinceLastCollision = currentTime - demontime.time;
-
-                // Check if enough time has passed since the last collision
-                if (timeSinceLastCollision >= delayDuration) {
-                    health--;
-
-                    if (health <= 0)
-                    {
-                        player1.sprite.setTexture(playerTexture[2]);
-                        player1.move_x = 0.25;
-                        dead = 1;
-                    }
-                    demontime.time = currentTime; // Update last collision time
-                }
-
-
-            }
-            if (centattacking && healthcent != 0) {
-                auto currentTime = chrono::steady_clock::now();
-                auto timeSinceLastCollision = currentTime - demontime.time;
-
-                // Check if enough time has passed since the last collision
-                if (timeSinceLastCollision >= delayDuration) {
-                    health--;
-
-                    if (health <= 0)
-                    {
-                        player1.sprite.setTexture(playerTexture[2]);
-                        player1.move_x = 0.25;
-                        dead = 1;
-                    }
-                    demontime.time = currentTime; // Update last collision time
-                }
-
-            }
-            if (wolfattacking && healthwolf != 0) {
-                auto currentTime = chrono::steady_clock::now();
-                auto timeSinceLastCollision = currentTime - demontime.time;
-
-                // Check if enough time has passed since the last collision
-                if (timeSinceLastCollision >= delayDuration) {
-                    health--;
-
-                    if (health <= 0)
-                    {
-                        player1.sprite.setTexture(playerTexture[2]);
-                        player1.move_x = 0.25;
-                        dead = 1;
-                    }
-                    demontime.time = currentTime; // Update last collision time
-                }
-
-            }
-
-
-            /*  if (Keyboard::isKeyPressed(Keyboard::Z)&&(pl.getGlobalBounds().intersects(wol.getGlobalBounds())))
-              {
-                  player1.sprite.setTexture(playerTexture[1]);
-                  player1.move_x = -0.25;
-                  attack = 1;
-                  if (healthwolf > 0)
-                      healthwolf--;
-              }*/
-              /* if (wolfdamage == true && !Keyboard::isKeyPressed(Keyboard::Z))
-                   wolfdamage = false;*/
-
-
-
-                   /*  if (attack == true) {
-
-                    // }*///Time elapsed;
-                    //cout << healthdemon << endl;
-                    // 
-                    //// cout << healthwolf << endl;
-
-                    // if (healthwolf == 0&&!fading) {
-                    //     
-                    //     fading = true;
-                    //    wolfdead = true;
-                    //    wolfspeed = 0;
-                    //    wolf.setScale(2.2, 2.2);
-                    //    death.restart();
-
-                    //    elapsed = death.getElapsedTime();
-                    //    
-
-                    // }
-                    //
-                    //      if (healthcent == 0 && !fading) {
-                    //     fading = true;
-
-                    //     centdead = true;
-                    //     centspeed = 0;
-                    //     centipede.setScale(2.2, 2.2);
-                    //     death.restart();
-
-                    //     elapsed = death.getElapsedTime();
-                    // }
-
-                    // 
-                    //   if (healthdemon == 0&&!fading) {
-                    //     fading = true;
-
-                    //     demondead = true;
-                    //     demonspeed = 0;
-                    //     demon.setScale(2.2, 2.2);
-                    //     //   healthdemon = -1;
-                    //     death.restart();
-
-                    //     elapsed = death.getElapsedTime();
-
-                    // }
-
-                   //  if (healthdemon >= 0)
-                     //    death.restart();
-                        // if (death.getElapsedTime().asSeconds() - elapsed.asSeconds() >= 3 && demondead == true)
-                        // {
-                   //  if (death.getElapsedTime().asSeconds() >= 3.f && demondead == true) {
-                     //    demon.setScale(0, 0);
-
-
-                       //  deaddem = true;
-                    //// }         
-                     //if (fading) {
-                     //    // Calculate the alpha value based on elapsed time and fade duration
-                     //    float alpha = 255 * (1 - (death.getElapsedTime().asSeconds() - elapsed.asSeconds()) / fadeDuration);
-                     //    if (alpha <= 0) {
-                     //        alpha = 0; // Ensure alpha doesn't go below 0
-                     //        fading = false;
-                     //        faded = true;
-                     //     
-
-                     //    }
-                     //    if (faded&&demondead) {
-                     //        
-                     //        demon.setScale(0, 0);
-                     //      
-                     //    }
-                     //    if (faded && centdead) {
-                     //        centspeed = 0;
-
-                     //        centipede.setScale(0, 0);
-                     //    }
-                     //    if (faded && wolfdead) {
-                     //        wolf.setScale(0, 0);
-                     //    }
-                     //        
-
-
-                     //    sf::Color color = demon.getColor();
-                     //    color.a = static_cast<sf::Uint8>(alpha);
-                     //    demon.setColor(color);
-                     //    if (alpha == 0) {
-                     //        fading = false;
-                     //        //  death.restart();
-                     //        
-                     //    }
-                     //}
-
-                 /*    if (deaddem == true){
-                         cout << "dead";
-
-                     }
-                 */
-
-
-                 // if (demondead == true)
-                     // demonspeed = 0;
-                      //wolf.setScale(0, 0);
-                  //to make player stop when collides with an obsatcle 
-
-            cout << health;
-
+            //to make player stop when collides with an obsatcle 
             if (!levelTransitionCompleted) {
                 for (int i = 0; i < 9; i++) {
                     if (isColliding(rec, ob1[i])) {
@@ -1610,20 +1353,19 @@ void Game_Play(RenderWindow& window)
                 }
             }
 
-
             if (cam.getCenter().x + cam.getSize().x / 2.f >= background.getGlobalBounds().left + background.getGlobalBounds().width) {
                 cam.setCenter(background.getGlobalBounds().left + background.getGlobalBounds().width - cam.getSize().x / 2.f, cam.getCenter().y);
             }
             // Update the view only if the player reaches the edges of the window
-            if (player1.sprite.getPosition().x > cam.getCenter().x + 350) {
+            if (player1.sprite.getPosition().x > cam.getCenter().x + 50) {
                 cam.move(5, 0); // Move the view to the right
             }
             else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
                 cam.move(-5, 0); // Move the view to the left
             }
-            /* if (timer2>4.0) {
-                 showLetter = true;
-             }*/
+            hpp.setPosition(cam.getCenter().x - 595, cam.getCenter().y - 360.5);
+            hpbar.setPosition(cam.getCenter().x - 590, cam.getCenter().y - 356.5);
+            phealth.setPosition(cam.getCenter().x - 590, cam.getCenter().y - 410);
 
             if (attack) {
                 player1.update(timer, 3);
@@ -1641,6 +1383,10 @@ void Game_Play(RenderWindow& window)
 
             window.clear();
             window.draw(background);
+            window.draw(hpbar);
+            window.draw(phealth);
+            window.draw(hpp);
+
             //window.draw(rec);
 
           //  window.draw(player1.sprite);
@@ -1649,11 +1395,7 @@ void Game_Play(RenderWindow& window)
             float height = 100.f;
             pl.setSize(Vector2f(width, height));
             wol.setPosition(wolf.getPosition().x - 70.f, wolf.getPosition().y - 20.f);
-            dem.setPosition(demon.getPosition().x - 70.f, demon.getPosition().y - 20.f);
-            dem.setSize(Vector2f(100, 140));
-
             wol.setSize(Vector2f(120, 140));
-            //cout << pl.getPosition().y - dem.getPosition().y;
 
             //   float dt = clock.restart().asSeconds();
                //   window.clear();
@@ -1664,9 +1406,7 @@ void Game_Play(RenderWindow& window)
             window.draw(demon);
 
             window.draw(wolf);
-            // window.draw(pl);
 
-          //   window.draw(dem);
             window.draw(mud);
 
 
@@ -1679,7 +1419,7 @@ void Game_Play(RenderWindow& window)
             if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
 
                 // Display the letter transition
-                displayLetterTransition(window, letter1Sprite, transitionTriggered, cam);
+                displayLetterTransition(window, letter2Sprite, transitionTriggered, cam);
                 // window.draw(letter1Sprite);
                 handleLevelTransition(background, player1, playerPosition, level2texture, ob1, ob2, ob3, ob4, ob3tex, ob4tex, ob2tex, ob1tex);
 
@@ -1690,6 +1430,7 @@ void Game_Play(RenderWindow& window)
                 cout << "DONE" << endl;
                 // Replace "transitionSprite" with your actual sprite variable
                 displayLetterTransition(window, letter1Sprite, transitionTriggered, cam);
+                // window.draw(letter1Sprite);
                 showLetter = false;
                 letterDisplayed = true; // Update the flag to indicate that the letter has been displayed
             }
@@ -1699,7 +1440,6 @@ void Game_Play(RenderWindow& window)
                     window.draw(ob1[i]);
                     window.draw(ob2[i]);
                 }
-                //  displayLetterTransition(window, letter2Sprite, transitionTriggered);
                 window.draw(rectangle);
             }
 
@@ -1712,7 +1452,10 @@ void Game_Play(RenderWindow& window)
                     window.draw(reclevel3);
                 }
                 else {
-
+                    // handle enemies draw
+                    for (int i = 0; i < 9; i++) {
+                        window.draw(ob5[i]);
+                    }
                 }
             }
 
@@ -1749,3 +1492,11 @@ void Game_Play(RenderWindow& window)
 
     }
 }
+
+
+
+
+
+
+
+
