@@ -786,11 +786,11 @@ void Game_Play(RenderWindow& window)
     level3texture.loadFromFile("level1_backgroundnew.png");
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(6550.f, 750.f);
+    rectangle.setPosition(6560.f, 750.f);
     rectangle.setFillColor(sf::Color::White); // Fill color
 
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
-    reclevel3.setPosition(6560.f, 750.f);
+    reclevel3.setPosition(6590.f, 750.f);
     reclevel3.setFillColor(sf::Color::Red); // Fill color
 
     // Sprite ob1(ob1tex);
@@ -2205,7 +2205,7 @@ void Game_Play(RenderWindow& window)
                         window.draw(ob2[i]);
                     }
                     //  displayLetterTransition(window, letter2Sprite, transitionTriggered);
-                    window.draw(rectangle);
+                   // window.draw(rectangle);
                 }
 
                 else {
@@ -2224,7 +2224,7 @@ void Game_Play(RenderWindow& window)
 
                         // window.draw(cen);
                          //window.draw(pl);
-                        window.draw(reclevel3);
+                       // window.draw(reclevel3);
                     }
                     else {
                         for (int i = 0; i < 9; i++) {
