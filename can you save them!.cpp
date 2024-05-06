@@ -112,91 +112,6 @@ struct enemy {
     Texture textures[5];
     IntRect rectSource[5];
 };
-struct Enemy {
-    Sprite sprite;
-    int damage;
-    float currentframe;
-    float move_x;
-    FloatRect rectenemy;
-    int ip_x;
-    int ip_y;
-    int chase_range;
-    bool attack = false;
-    bool dead = false;
-    bool stunned = false;
-    int direction = 1;
-
-    void init(Texture& enemy_texture) {
-        sprite.setTexture(enemy_texture);
-        move_x = 0;
-        currentframe = 0;
-    }
-
-    void update_enemy(float timer, bool attack, Texture& attack_texture, bool dead, Texture& death_texture) {
-        if (attack) {
-            sprite.setTexture(attack_texture);
-        }
-        if (dead) {
-            sprite.setTexture(death_texture);
-        }
-        rectenemy.left += move_x * timer;
-        currentframe += 0.004 * timer;
-        if (!dead) {
-            if (currentframe > 4)
-                currentframe -= 4;
-
-        }
-        if (move_x > 0) {
-            sprite.setTextureRect(IntRect(48 * int(currentframe) + 48, 0, -48, 48));
-        }
-        if (move_x < 0) {
-            sprite.setTextureRect(IntRect(48 * int(currentframe), 0, 48, 48));
-        }
-        sprite.setPosition(rectenemy.left + ip_x, ip_y);
-        move_x = 0;
-    }
-
-    void update_enemy3(float timer, bool attack, Texture& enemy_texture, Texture attack_textures[], bool dead, Texture& death_texture, bool stunned, Texture stunned_texture) {
-        if (attack) {
-            sprite.setTexture(attack_textures[2]);
-            if (currentframe > 4)
-                currentframe -= 4;
-        }
-        if (dead) {
-            sprite.setTexture(death_texture);
-            move_x = 0.001;
-            currentframe += 0.0001;
-            if (currentframe > 5) {
-                move_x = 0;
-                rectenemy.left = 90000;
-            }
-        }
-        if (stunned) {
-            sprite.setTexture(stunned_texture);
-            move_x = 0.001;
-            //currentframe += 0.0000001;
-            if (currentframe > 3) {
-                stunned = false;
-                sprite.setTexture(enemy_texture);
-            }
-        }
-        rectenemy.left += move_x * timer;
-        currentframe += 0.008 * timer;
-        if (!dead) {
-            if (currentframe > 6)
-                currentframe -= 6;
-        }
-        if (move_x > 0) {
-            sprite.setTextureRect(IntRect(128 * int(currentframe) + 128, 0, 128, 128));
-        }
-        if (move_x < 0) {
-            sprite.setTextureRect(IntRect(128 * int(currentframe), 0, -128, 128));
-        }
-        sprite.setPosition(rectenemy.left + ip_x, ip_y);
-        move_x = 0;
-    }
-};
-
 
 void loadTextureAndRect(Texture& texture, IntRect& rect, const string& filename, int rectWidth, int rectHeight) {
     texture.loadFromFile(filename);
@@ -729,7 +644,6 @@ int main()
 }
 void Game_Play(RenderWindow& window)
 {
-    Clock hclock;
     //obstacles
     Texture ob1tex, ob2tex, ob3tex, ob4tex, ob5tex;
     ob1tex.loadFromFile("ob1.png");
@@ -758,12 +672,12 @@ void Game_Play(RenderWindow& window)
     for (int i = 0; i < 5; i++) {
         ob3[i].setTexture(ob3tex);
         ob3[i].setScale(0.08, 0.1);
-        int randomX = static_cast<float>(rand() % (5600 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+        int randomX = (i + 1) * 900;
         ob3[i].setPosition(randomX, 765);
 
         ob4[i].setTexture(ob4tex);
         ob4[i].setScale(0.1, 0.1);
-        randomX = static_cast<float>(rand() % (5000 - static_cast<int>(ob1[i].getGlobalBounds().width))) + ((i + 1) * 600);
+        randomX = (i + 1) * 500;
         ob4[i].setPosition(randomX, 750);
     }
 
@@ -873,108 +787,6 @@ void Game_Play(RenderWindow& window)
     bool attack = 0;
     bool dead = 0;
 
-    Texture Enemyphoto;
-    Enemyphoto.loadFromFile("Snake_walk.png");
-    Texture Enemyattack;
-    Enemyattack.loadFromFile("Snake_attack.png");
-    Texture Enemydeath;
-    Enemydeath.loadFromFile("Snake_death.png");
-    Enemy enemy1;
-    enemy1.init(Enemyphoto);
-    enemy1.sprite.setScale(3.5, 3);
-    enemy1.sprite.setTextureRect(IntRect(0, 0, 48, 48));
-    enemy1.ip_x = 1300;
-    enemy1.ip_y = 690;
-    enemy1.sprite.setPosition(enemy1.ip_x, enemy1.ip_y);
-    enemy1.chase_range = 200;
-
-    Enemy enemy2;
-    enemy2.init(Enemyphoto);
-    enemy2.sprite.setScale(3.5, 3);
-    enemy2.sprite.setTextureRect(IntRect(0, 0, 48, 48));
-    enemy2.ip_x = 2100;
-    enemy2.ip_y = 690;
-    enemy2.sprite.setPosition(enemy2.ip_x, enemy2.ip_y);
-    enemy2.chase_range = 200;
-
-
-    Enemy enemy4;
-    enemy4.init(Enemyphoto);
-    enemy4.sprite.setScale(3.5, 3);
-    enemy4.sprite.setTextureRect(IntRect(0, 0, 48, 48));
-    enemy4.ip_x = 3200;
-    enemy4.ip_y = 690;
-    enemy4.sprite.setPosition(enemy4.ip_x, enemy4.ip_y);
-    enemy4.chase_range = 200;
-
-    Enemy enemy5;
-    enemy5.init(Enemyphoto);
-    enemy5.sprite.setScale(3.5, 3);
-    enemy5.sprite.setTextureRect(IntRect(0, 0, 48, 48));
-    enemy5.ip_x = 4000;
-    enemy5.ip_y = 690;
-    enemy5.sprite.setPosition(enemy5.ip_x, enemy5.ip_y);
-    enemy5.chase_range = 200;
-
-    Texture Enemy3photo;
-    Enemy3photo.loadFromFile("gWalk (1).png");
-    Texture Enemy3attack1;
-    Enemy3attack1.loadFromFile("gAttack_1.png");
-    Texture Enemy3attack2;
-    Enemy3attack2.loadFromFile("gAttack_2.png");
-    Texture Enemy3attack3;
-    Enemy3attack3.loadFromFile("gAttack_3.png");
-    Texture attack_textures[3] = { Enemy3attack1 ,Enemy3attack2, Enemy3attack3 };
-    Texture Enemy3death;
-    Enemy3death.loadFromFile("gDead.png");
-    Texture enemy3stunned;
-    enemy3stunned.loadFromFile("gStunned.png");
-    Enemy enemy3;
-    enemy3.init(Enemy3photo);
-    enemy3.sprite.setScale(1.8, 1.8);
-    enemy3.sprite.setTextureRect(IntRect(0, 0, 128, 128));
-    enemy3.ip_x = 850;
-    enemy3.ip_y = 600;
-    enemy3.sprite.setPosition(enemy3.ip_x, enemy3.ip_y);
-    enemy3.chase_range = 200;
-
-    RectangleShape pl2(Vector2f(50.f, 50.f));
-    pl2.setFillColor(sf::Color::Red);
-    pl2.setPosition(player1.sprite.getPosition().x + 80.f, player1.sprite.getPosition().y + 80.f);
-    float width = 50.f;
-    float height = 180.f;
-    pl2.setSize(Vector2f(width, height));
-
-    RectangleShape snake(Vector2f(50.f, 50.f));
-    snake.setFillColor(sf::Color::Blue);
-    snake.setPosition(enemy1.sprite.getPosition().x + 20.f, enemy1.sprite.getPosition().y + 70.f);
-    snake.setSize(Vector2f(78, 68));
-
-    RectangleShape snake2(Vector2f(50.f, 50.f));
-    snake2.setFillColor(sf::Color::Green);
-    snake2.setPosition(enemy2.sprite.getPosition().x + 20.f, enemy2.sprite.getPosition().y + 70.f);
-    snake2.setSize(Vector2f(78, 68));
-
-    RectangleShape snake4(Vector2f(50.f, 50.f));
-    snake4.setFillColor(sf::Color::Green);
-    snake4.setPosition(enemy4.sprite.getPosition().x + 20.f, enemy4.sprite.getPosition().y + 70.f);
-    snake4.setSize(Vector2f(78, 68));
-
-    RectangleShape snake5(Vector2f(50.f, 50.f));
-    snake5.setFillColor(sf::Color::Green);
-    snake5.setPosition(enemy5.sprite.getPosition().x + 20.f, enemy5.sprite.getPosition().y + 70.f);
-    snake5.setSize(Vector2f(78, 68));
-
-    RectangleShape b(Vector2f(50.f, 50.f));
-    b.setFillColor(sf::Color::Magenta);
-    b.setPosition(enemy3.sprite.getPosition().x + 90.f, enemy3.sprite.getPosition().y + 100.f);
-    b.setSize(Vector2f(50, 120));
-
-    RectangleShape t(Vector2f(50.f, 50.f));
-    t.setFillColor(sf::Color::Yellow);
-    t.setPosition(enemy3.ip_x, enemy3.ip_y + 150);
-    t.setSize(Vector2f(40, 40));
-
     Texture level1texture;
     level1texture.loadFromFile("back1new.png");
 
@@ -985,11 +797,11 @@ void Game_Play(RenderWindow& window)
     level3texture.loadFromFile("level1_backgroundnew.png");
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(6560.f, 750.f);
+    rectangle.setPosition(6600.f, 750.f);
     rectangle.setFillColor(sf::Color::White); // Fill color
 
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
-    reclevel3.setPosition(6590.f, 750.f);
+    reclevel3.setPosition(6900.f, 750.f);
     reclevel3.setFillColor(sf::Color::Red); // Fill color
 
     // Sprite ob1(ob1tex);
@@ -1289,11 +1101,6 @@ void Game_Play(RenderWindow& window)
 
     LastCollisionTime lastCollisionOb1[9]; // Store last collision time for ob1
     LastCollisionTime lastCollisionOb2[9]; // Store last collision time for ob2
-    LastCollisionTime enemy1t;
-    LastCollisionTime enemy2t;
-    LastCollisionTime enemy4t;
-    LastCollisionTime enemy5t;
-
 
     // Define the delay duration (e.g., 2 seconds)
     const std::chrono::seconds delayDuration(2);
@@ -1304,12 +1111,6 @@ void Game_Play(RenderWindow& window)
 
     while (window.isOpen())
     {
-        float htimer = hclock.getElapsedTime().asMicroseconds();
-        hclock.restart();
-        htimer /= 1000;
-        if (htimer > 100)
-            htimer = 100;
-
         // sound.play();
         Event event;
         //cam.setCenter(Vector2f(player1.sprite.getPosition().x + 600, 500));
@@ -1397,296 +1198,6 @@ void Game_Play(RenderWindow& window)
                         lastCollisionOb2[i].time = currentTime; // Update last collision time
                     }
 
-                }
-            }
-            pl2.setPosition(player1.sprite.getPosition().x + 80.f, player1.sprite.getPosition().y + 80.f);
-
-            snake.setPosition(enemy1.sprite.getPosition().x + 20.f, enemy1.sprite.getPosition().y + 70.f);
-
-            snake2.setPosition(enemy2.sprite.getPosition().x + 20.f, enemy2.sprite.getPosition().y + 70.f);
-
-            snake4.setPosition(enemy4.sprite.getPosition().x + 20.f, enemy4.sprite.getPosition().y + 70.f);
-
-            snake5.setPosition(enemy5.sprite.getPosition().x + 20.f, enemy5.sprite.getPosition().y + 70.f);
-
-            b.setPosition(enemy3.sprite.getPosition().x + 90.f, enemy3.sprite.getPosition().y + 100.f);
-
-            t.setPosition(enemy3.ip_x, enemy3.ip_y + 150);
-
-            //enemy1
-            if (player1.sprite.getPosition().x < (enemy1.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy1.sprite.getPosition().x + 300)) {
-                enemy1.move_x = -0.25;
-
-                if ((enemy1.sprite.getPosition().x) < (enemy1.ip_x - enemy1.chase_range) || (enemy1.sprite.getPosition().x > (enemy1.ip_x + enemy1.chase_range)))
-                    enemy1.direction *= -1;
-
-                enemy1.move_x *= enemy1.direction;
-                enemy1.sprite.move(enemy1.move_x, 0);
-            }
-            else {
-                enemy1.attack = true;
-
-                if (player1.sprite.getPosition().x < (enemy1.sprite.getPosition().x))
-                    enemy1.direction = -1;
-
-                else if (player1.sprite.getPosition().x >= (enemy1.sprite.getPosition().x)) {
-                    enemy1.direction = 1;
-                }
-
-                enemy1.move_x = enemy1.direction * 0.2;
-            }
-
-            if (enemy1.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy1.sprite.getPosition().x > player1.sprite.getPosition().x)
-                enemy1.move_x = 0;
-
-            if (enemy1.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy1.sprite.getPosition().x < player1.sprite.getPosition().x)
-                enemy1.move_x = 0;
-
-            if (pl2.getGlobalBounds().intersects(snake.getGlobalBounds())) {
-
-                if (player1.sprite.getPosition().x <= snake.getPosition().x) {
-                    player1.rect.left = snake.getPosition().x - 170;
-
-                    auto currentTime = std::chrono::steady_clock::now();
-                    auto timeSinceLastCollision = currentTime - enemy1t.time;
-
-                    // Check if enough time has passed since the last collision
-                    if (timeSinceLastCollision >= delayDuration) {
-
-                        health--;
-                        cout << health << endl;
-                        if (health <= 0)
-                        {
-                            player1.sprite.setTexture(playerTexture[2]);
-                            player1.move_x = 0.25;
-                            dead = 1;
-                        }
-                        enemy1t.time = currentTime; // Update last collision time
-                    }
-
-                }
-
-
-                float player_bottom = pl2.getPosition().y + height;
-                float snake_top = snake.getPosition().y + 10;
-                if (player_bottom < snake_top) {
-                    enemy1.dead = true;
-
-                }
-
-            }
-
-            if (enemy1.dead == true) {
-                enemy1.move_x = 0.001;
-                if (enemy1.currentframe > 4) {
-                    enemy1.rectenemy.left = 90000;
-                    snake.setPosition(90000, 80000);
-                }
-            }
-
-
-            //enemy2
-            if (player1.sprite.getPosition().x < (enemy2.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy2.sprite.getPosition().x + 300)) {
-                enemy2.move_x = -0.25;
-
-                if ((enemy2.sprite.getPosition().x) < (enemy2.ip_x - enemy2.chase_range) || (enemy2.sprite.getPosition().x > (enemy2.ip_x + enemy2.chase_range)))
-                    enemy2.direction *= -1;
-
-                enemy2.move_x *= enemy2.direction;
-                enemy2.sprite.move(enemy2.move_x, 0);
-            }
-            else {
-                enemy2.attack = true;
-
-                if (player1.sprite.getPosition().x < (enemy2.sprite.getPosition().x))
-                    enemy2.direction = -1;
-
-                else if (player1.sprite.getPosition().x >= (enemy2.sprite.getPosition().x)) {
-                    enemy2.direction = 1;
-                }
-
-                enemy2.move_x = enemy2.direction * 0.2;
-            }
-
-            if (enemy2.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy2.sprite.getPosition().x > player1.sprite.getPosition().x)
-                enemy2.move_x = 0;
-
-            if (enemy2.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy2.sprite.getPosition().x < player1.sprite.getPosition().x)
-                enemy2.move_x = 0;
-
-            if (pl2.getGlobalBounds().intersects(snake2.getGlobalBounds())) {
-
-                if (player1.sprite.getPosition().x <= snake2.getPosition().x) {
-                    player1.rect.left = snake2.getPosition().x - 170;
-                    auto currentTime = std::chrono::steady_clock::now();
-                    auto timeSinceLastCollision = currentTime - enemy2t.time;
-
-                    // Check if enough time has passed since the last collision
-                    if (timeSinceLastCollision >= delayDuration) {
-
-                        health--;
-                        cout << health << endl;
-                        if (health <= 0)
-                        {
-                            player1.sprite.setTexture(playerTexture[2]);
-                            player1.move_x = 0.25;
-                            dead = 1;
-                        }
-                        enemy2t.time = currentTime; // Update last collision time
-                    }
-                }
-
-                float player_bottom = pl2.getPosition().y + height;
-                float snake_top = snake2.getPosition().y + 10;
-                if (player_bottom < snake_top) {
-                    enemy2.dead = true;
-                }
-
-            }
-
-            if (enemy2.dead == true) {
-                enemy2.move_x = 0.001;
-                if (enemy2.currentframe > 4) {
-                    enemy2.rectenemy.left = 90000;
-                    snake2.setPosition(90000, 80000);
-                }
-            }
-
-
-
-            //enemy4
-            if (player1.sprite.getPosition().x < (enemy4.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy4.sprite.getPosition().x + 300)) {
-                enemy4.move_x = -0.25;
-
-                if ((enemy4.sprite.getPosition().x) < (enemy4.ip_x - enemy4.chase_range) || (enemy4.sprite.getPosition().x > (enemy4.ip_x + enemy4.chase_range)))
-                    enemy4.direction *= -1;
-
-                enemy4.move_x *= enemy4.direction;
-                enemy4.sprite.move(enemy4.move_x, 0);
-            }
-            else {
-                enemy4.attack = true;
-
-                if (player1.sprite.getPosition().x < (enemy4.sprite.getPosition().x))
-                    enemy4.direction = -1;
-
-                else if (player1.sprite.getPosition().x >= (enemy4.sprite.getPosition().x)) {
-                    enemy4.direction = 1;
-                }
-
-                enemy4.move_x = enemy4.direction * 0.2;
-            }
-
-            if (enemy4.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy4.sprite.getPosition().x > player1.sprite.getPosition().x)
-                enemy4.move_x = 0;
-
-            if (enemy4.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy4.sprite.getPosition().x < player1.sprite.getPosition().x)
-                enemy4.move_x = 0;
-
-            if (pl2.getGlobalBounds().intersects(snake4.getGlobalBounds())) {
-
-                if (player1.sprite.getPosition().x <= snake4.getPosition().x) {
-                    player1.rect.left = snake4.getPosition().x - 170;
-                    auto currentTime = std::chrono::steady_clock::now();
-                    auto timeSinceLastCollision = currentTime - enemy4t.time;
-
-                    // Check if enough time has passed since the last collision
-                    if (timeSinceLastCollision >= delayDuration) {
-
-                        health--;
-                        cout << health << endl;
-                        cout << "flag4" << endl;
-                        if (health <= 0)
-                        {
-                            player1.sprite.setTexture(playerTexture[2]);
-                            player1.move_x = 0.25;
-                            dead = 1;
-                        }
-                        enemy4t.time = currentTime; // Update last collision time
-                    }
-                }
-
-                float player_bottom = pl2.getPosition().y + height;
-                float snake_top = snake4.getPosition().y + 10;
-                if (player_bottom < snake_top) {
-                    enemy4.dead = true;
-                }
-
-            }
-
-            if (enemy4.dead == true) {
-                enemy4.move_x = 0.001;
-                if (enemy4.currentframe > 4) {
-                    enemy4.rectenemy.left = 90000;
-                    snake4.setPosition(90000, 80000);
-                }
-            }
-
-            //enemy5
-            if (player1.sprite.getPosition().x < (enemy5.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy5.sprite.getPosition().x + 300)) {
-                enemy5.move_x = -0.25;
-
-                if ((enemy5.sprite.getPosition().x) < (enemy5.ip_x - enemy5.chase_range) || (enemy5.sprite.getPosition().x > (enemy5.ip_x + enemy5.chase_range)))
-                    enemy5.direction *= -1;
-
-                enemy5.move_x *= enemy5.direction;
-                enemy5.sprite.move(enemy5.move_x, 0);
-            }
-            else {
-                enemy5.attack = true;
-
-                if (player1.sprite.getPosition().x < (enemy5.sprite.getPosition().x))
-                    enemy5.direction = -1;
-
-                else if (player1.sprite.getPosition().x >= (enemy5.sprite.getPosition().x)) {
-                    enemy5.direction = 1;
-                }
-
-                enemy5.move_x = enemy5.direction * 0.2;
-            }
-
-            if (enemy5.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy5.sprite.getPosition().x > player1.sprite.getPosition().x)
-                enemy5.move_x = 0;
-
-            if (enemy5.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy5.sprite.getPosition().x < player1.sprite.getPosition().x)
-                enemy5.move_x = 0;
-
-            if (pl2.getGlobalBounds().intersects(snake5.getGlobalBounds())) {
-
-                if (player1.sprite.getPosition().x <= snake5.getPosition().x) {
-                    player1.rect.left = snake5.getPosition().x - 170;
-                    auto currentTime = std::chrono::steady_clock::now();
-                    auto timeSinceLastCollision = currentTime - enemy5t.time;
-
-                    // Check if enough time has passed since the last collision
-                    if (timeSinceLastCollision >= delayDuration) {
-
-                        health--;
-                        cout << health << endl;
-                        cout << "flag5" << endl;
-                        if (health <= 0)
-                        {
-                            player1.sprite.setTexture(playerTexture[2]);
-                            player1.move_x = 0.25;
-                            dead = 1;
-                        }
-                        enemy5t.time = currentTime; // Update last collision time
-                    }
-                }
-
-                float player_bottom = pl2.getPosition().y + height;
-                float snake_top = snake5.getPosition().y + 10;
-                if (player_bottom < snake_top) {
-                    enemy5.dead = true;
-                }
-
-            }
-
-            if (enemy5.dead == true) {
-                enemy5.move_x = 0.001;
-                if (enemy5.currentframe > 4) {
-                    enemy5.rectenemy.left = 90000;
-                    snake5.setPosition(90000, 80000);
                 }
             }
         }
@@ -2740,7 +2251,7 @@ void Game_Play(RenderWindow& window)
                     //  window.draw(background);
                 window.draw(player1.sprite);
                 window.draw(letterSprite);
-                window.draw(rectangle);
+
 
                 /*for (int i = 0; i < 3; i++) {
                     window.draw(cacodemon[i].sprite);
@@ -2769,23 +2280,7 @@ void Game_Play(RenderWindow& window)
                     for (int i = 0; i < 9; i++) {
                         window.draw(ob1[i]);
                         window.draw(ob2[i]);
-
                     }
-
-                    window.draw(enemy1.sprite);
-                    window.draw(enemy2.sprite);
-                    window.draw(enemy4.sprite);
-                    window.draw(enemy5.sprite);
-                    //window.draw(snake);
-                    //window.draw(snake2);
-                    //window.draw(snake4);
-                    //window.draw(snake5);
-                    //window.draw(pl2);
-
-                    enemy1.update_enemy(htimer, enemy1.attack, Enemyattack, enemy1.dead, Enemydeath);
-                    enemy2.update_enemy(htimer, enemy2.attack, Enemyattack, enemy2.dead, Enemydeath);
-                    enemy4.update_enemy(htimer, enemy4.attack, Enemyattack, enemy4.dead, Enemydeath);
-                    enemy5.update_enemy(htimer, enemy5.attack, Enemyattack, enemy5.dead, Enemydeath);
                     //  displayLetterTransition(window, letter2Sprite, transitionTriggered);
                    // window.draw(rectangle);
                 }
@@ -2888,6 +2383,8 @@ void Game_Play(RenderWindow& window)
                 health = 40;
                 level3Completed = false;
                 levelTransitionCompleted = false;
+                rectangle.setPosition(6600.f, 750.f);
+                reclevel3.setPosition(6900.f, 750.f);
                 againSound.stop();
                 Game_Play(window);
 
