@@ -672,12 +672,12 @@ void Game_Play(RenderWindow& window)
     for (int i = 0; i < 5; i++) {
         ob3[i].setTexture(ob3tex);
         ob3[i].setScale(0.08, 0.1);
-        int randomX = static_cast<float>(rand() % (5600 - static_cast<int>(ob2[i].getGlobalBounds().width))) + ((i + 1) * 650);
+        int randomX = (i+1)*900;
         ob3[i].setPosition(randomX, 765);
 
         ob4[i].setTexture(ob4tex);
         ob4[i].setScale(0.1, 0.1);
-        randomX = static_cast<float>(rand() % (5000 - static_cast<int>(ob1[i].getGlobalBounds().width))) + ((i + 1) * 600);
+        randomX = (i + 1) * 500;
         ob4[i].setPosition(randomX, 750);
     }
 
@@ -797,11 +797,11 @@ void Game_Play(RenderWindow& window)
     level3texture.loadFromFile("level1_backgroundnew.png");
 
     RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
-    rectangle.setPosition(6560.f, 750.f);
+    rectangle.setPosition(6600.f, 750.f);
     rectangle.setFillColor(sf::Color::White); // Fill color
 
     RectangleShape reclevel3(sf::Vector2f(100.f, 100.f));
-    reclevel3.setPosition(6590.f, 750.f);
+    reclevel3.setPosition(6900.f, 750.f);
     reclevel3.setFillColor(sf::Color::Red); // Fill color
 
     // Sprite ob1(ob1tex);
@@ -2251,7 +2251,7 @@ void Game_Play(RenderWindow& window)
                     //  window.draw(background);
                 window.draw(player1.sprite);
                 window.draw(letterSprite);
-                window.draw(rectangle);
+                
 
                 /*for (int i = 0; i < 3; i++) {
                     window.draw(cacodemon[i].sprite);
@@ -2383,6 +2383,8 @@ void Game_Play(RenderWindow& window)
                 health = 40;
                 level3Completed = false;
                 levelTransitionCompleted = false;
+                rectangle.setPosition(6600.f, 750.f);
+                reclevel3.setPosition(6900.f, 750.f);
                 againSound.stop();
                 Game_Play(window);
 
