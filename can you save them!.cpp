@@ -28,6 +28,7 @@ float deat = 0.0f;
 bool fading = false;
 float fadeDuration = 3.0f;
 bool faded = false;
+bool specialswitch = false;
 
 bool wolfdamage = false;
 Clock cent;
@@ -273,6 +274,15 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
         window.display();
     }
 }
+void switchCharacter(player& player, const Texture& newTexture) {
+    player.sprite.setTexture(newTexture);
+    player.sprite.setScale(3.0f, 3.0f);
+    //  player.sprite.setOrigin(10 / 2 , 0);
+
+
+      // Additional setup or logic for switching characters if needed
+}
+
 void Game_Play(RenderWindow& window);
 struct Button {
     Text text;
@@ -327,10 +337,11 @@ struct LastCollisionTime {
     std::chrono::steady_clock::time_point time;
 };
 
-void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, bool& transitionTriggered, View cam) {
+void displayLetterTransition(RenderWindow& window, Sprite& transitionSprite, bool& transitionTriggered, View cam,Sound sound) {
     float transitionAlpha = 0.0f; // Initial transparency of the transition sprite
     bool spacePressed = false; // Flag to indicate if space key is pressed
     Clock transitionTimer;
+    sound.play();
     transitionTriggered = 0;
     // Only execute if the transition has not been triggered yet
     if (!transitionTriggered) {
@@ -632,7 +643,7 @@ int main()
     return 0;
 }
 void Game_Play(RenderWindow& window)
-{
+{  
     //obstacles
     Texture ob1tex, ob2tex, ob3tex, ob4tex, ob5tex;
     ob1tex.loadFromFile("ob1.png");
@@ -673,7 +684,7 @@ void Game_Play(RenderWindow& window)
     for (int i = 0; i < 9; i++) {
         ob5[i].setTexture(ob5tex);
         ob5[i].setScale(0.145, 0.2);
-        int randomX =  (i * 900);
+        int randomX = (i * 900);
 
         ob5[i].setPosition(randomX, 765);
     }
@@ -781,7 +792,7 @@ void Game_Play(RenderWindow& window)
 
     Sprite background(level1texture);
     background.setPosition(-10, 1);
-    background.setScale(0.85,1.1);
+    background.setScale(0.85, 1.1);
     Texture level3texture;
     level3texture.loadFromFile("level1_backgroundnew.png");
 
@@ -819,6 +830,116 @@ void Game_Play(RenderWindow& window)
     }
     Sprite letter3Sprite(letter3Texture);
 
+    Texture overTexture;
+    if (!overTexture.loadFromFile("gameisOver.png")) {
+        cerr << "Failed to load over\n";
+        return;
+    }
+    Sprite gameOver(overTexture);
+    /*Texture tryTexture;
+    if (tryTexture.loadFromFile("try.png")) {
+        cerr << "Failed to load try nela\n";
+        return;
+    }
+    Sprite tryLetter(tryTexture);*/
+    Texture necklaceTexture;
+    if (!necklaceTexture.loadFromFile("necklace.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite necklaceSprite(necklaceTexture);
+    necklaceSprite.setPosition(300, 400);
+    necklaceSprite.setScale(2, 2);
+
+    Texture ballonTexture;
+    if (!ballonTexture.loadFromFile("ballon.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite ballonSprite(ballonTexture);
+    necklaceSprite.setPosition(300, 400);
+    necklaceSprite.setScale(2, 2);
+
+    Texture arrowTexture;
+    if (!arrowTexture.loadFromFile("arrow.png")) {
+        cerr << "Failed to load picture texture\n";
+        return;
+    }
+    Sprite arrowSprite(arrowTexture);
+    arrowSprite.setPosition(300, 400);
+    arrowSprite.setScale(2, 2);
+
+
+    SoundBuffer attacksoundBuffer;
+    if (!attacksoundBuffer.loadFromFile("attacks.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound attackSound;
+    attackSound.setBuffer(attacksoundBuffer);
+
+    SoundBuffer papersoundBuffer;
+    if (!papersoundBuffer.loadFromFile("paper.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound paperSound;
+    paperSound.setBuffer(papersoundBuffer);
+
+    SoundBuffer enemysoundBuffer;
+    if (!enemysoundBuffer.loadFromFile("enemyDamage.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound enemySound;
+    enemySound.setBuffer(enemysoundBuffer);
+
+
+    SoundBuffer PausesoundBuffer;
+    if (!PausesoundBuffer.loadFromFile("pauseSound1.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound pauseSound;
+    pauseSound.setBuffer(PausesoundBuffer);
+
+    SoundBuffer againBuffer;
+    if (!againBuffer.loadFromFile("gametry.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound againSound;
+    againSound.setBuffer(againBuffer);
+
+    SoundBuffer deathBuffer;
+    if (!deathBuffer.loadFromFile("attackSound1.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound deathSound;
+    deathSound.setBuffer(deathBuffer);
+
+    SoundBuffer bossBattleBuffer;
+    if (!bossBattleBuffer.loadFromFile("bossBatlle.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound bossBattleSound;
+    bossBattleSound.setBuffer(bossBattleBuffer);
+
+
+
+    SoundBuffer soundBuffer;
+    if (!soundBuffer.loadFromFile("gameLoop.wav")) {
+        cerr << "Failed to load sound!" << endl;
+
+    }
+    Sound sound;
+    sound.setBuffer(soundBuffer);
+
+    sound.play();
+    sound.setLoop(true);
+
     Clock death;
     enemy wolf;
     enemy wolf2;
@@ -826,7 +947,7 @@ void Game_Play(RenderWindow& window)
     enemy centipede2;
     enemy demon;
     enemy mud;
-
+    enemy waechter;
 
     RectangleShape pl(Vector2f(50.f, 50.f)); // Create a rectangle shape
     pl.setFillColor(sf::Color::Red); // Set its color
@@ -843,10 +964,24 @@ void Game_Play(RenderWindow& window)
     cen.setFillColor(sf::Color::Blue); // Set its color
     cen.setPosition(50.f, 300.f); //
 
+    setupSprite(waechter, 500.f, 750.f, 2.f, 2.f, 96 / 2, 96 / 2);
+    Texture waechterwalktext;
+    IntRect rectwaechterwalk;
+    loadTextureAndRect(waechterwalktext, rectwaechterwalk, "waechter_walk.png", 96, 96);
+    Texture specialwalktext;
+    IntRect rectspecialwalk;
+    loadTextureAndRect(specialwalktext, rectspecialwalk, "special_walk.png", 62, 100);
+
+
+    Texture specialattacktext;
+    IntRect rectspecialattack;
+    loadTextureAndRect(specialattacktext, rectspecialattack, "special_attack.png", 128, 100);
+
+
     /* Sprite wolfff;
      Sprite wolfff2;*/
-    setupSprite(wolf, 3500.f, 650.f, 3.f, 3.f, 128 / 2, 128 / 2);
-    setupSprite(wolf2, 1500.f, 670.f, 2.5f, 2.5f, 128 / 2, 128 / 2);
+    setupSprite(wolf, 5500.f, 650.f, 3.f, 3.f, 128 / 2, 128 / 2);
+    setupSprite(wolf2, 4500.f, 670.f, 2.5f, 2.5f, 128 / 2, 128 / 2);
 
     Texture wolfwalktexture;
     IntRect rectsourcewolfwalk;
@@ -972,7 +1107,7 @@ void Game_Play(RenderWindow& window)
 
 
     bool transitionTriggered = false;
-
+    map < string, bool>enemyHealth;
 
     while (window.isOpen())
     {
@@ -987,6 +1122,9 @@ void Game_Play(RenderWindow& window)
                 if (event.key.code == sf::Keyboard::Escape) {
                     isPaused = !isPaused;
                     keyPressed = true;
+                    sound.stop();
+                    pauseSound.play();
+                        pauseSound.setLoop(true);
                 }
             }
             if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::P) {
@@ -1016,7 +1154,7 @@ void Game_Play(RenderWindow& window)
 
 
         if (player1.sprite.getGlobalBounds().intersects(reclevel3.getGlobalBounds())) {
-            displayLetterTransition(window, letter3Sprite, transitionTriggered, cam);
+            displayLetterTransition(window, letter3Sprite, transitionTriggered, cam,paperSound);
             Level3Transition(background, player1, playerPosition, level3texture);
 
         }
@@ -1046,7 +1184,7 @@ void Game_Play(RenderWindow& window)
                 if (isColliding(rec, ob2[i])) {
                     auto currentTime = std::chrono::steady_clock::now();
                     auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
-                    
+
                     // Check if enough time has passed since the last collision
                     if (timeSinceLastCollision >= delayDuration) {
                         health--;
@@ -1089,7 +1227,7 @@ void Game_Play(RenderWindow& window)
                     if (isColliding(rec, ob4[i])) {
                         auto currentTime = std::chrono::steady_clock::now();
                         auto timeSinceLastCollision = currentTime - lastCollisionOb2[i].time;
-                        
+
                         // Check if enough time has passed since the last collision
                         if (timeSinceLastCollision >= delayDuration) {
 
@@ -1159,19 +1297,21 @@ void Game_Play(RenderWindow& window)
                     wolf2.spritee.setScale(-2.5f, 2.5f);
                 }
 
-                if ((wolf2.spritee.getPosition().x < pl.getPosition().x) && (wolfwalking = true) || (wolf2.spritee.getPosition().x <= 2300.f)) {
+                if ((wolf2.spritee.getPosition().x < pl.getPosition().x) && (wolfwalking = true) || (wolf2.spritee.getPosition().x <= 4800.f)) {
                     wolfwalking = true;
                     wolfattacking = false;
                     wolf2.spritee.setScale(2.5f, 2.5f);
                     wolf2.spritee.move(-wolf2speed, 0.0f);
                 }
-                if ((wolf2.spritee.getPosition().x > pl.getPosition().x) && (wolfwalking = true) || (wolf2.spritee.getPosition().x >= 3700.f)) {
+
+                if ((wolf2.spritee.getPosition().x > pl.getPosition().x) && (wolfwalking = true)) {//|| (wolf2.spritee.getPosition().x >= 4700.f)) {
                     wolfattacking = false;
                     wolfwalking = true;
 
-                    wolf2.spritee.setScale(-3.f, 3.f);
+                    wolf2.spritee.setScale(-2.5f, 2.5f);
                     wolf2.spritee.move(wolf2speed, 0.0f);
                 }
+
 
                 if (abs(wolf2.spritee.getPosition().x - pl.getPosition().x) <= 2) {
                     wolfwalking = false;
@@ -1272,6 +1412,15 @@ void Game_Play(RenderWindow& window)
                             rectsourcewolfdead.left = 128;
                         }
 
+                        rectspecialwalk.left += 140;
+                        if (rectspecialwalk.left >= 1025)
+                            rectspecialwalk.left = 0;
+
+                        rectspecialwalk.height = 80;
+
+                        rectspecialattack.left += 67;
+                        if (rectspecialattack.left >= 1120)
+                            rectspecialattack.left = 0;
 
 
                         rectsourcecentwalk.left += 72;
@@ -1382,7 +1531,15 @@ void Game_Play(RenderWindow& window)
                             centipede2.spritee.setTextureRect(rectsourcecentdead);
                         }
                         //   
-                          // 
+                             if (specialswitch ) {
+                        player1.sprite.setTexture(specialwalktext);
+                        player1.sprite.setTextureRect(rectspecialwalk);
+                    }
+                    if (specialswitch && attack) {
+                        player1.sprite.setTexture(specialattacktext);
+                        player1.sprite.setTextureRect(rectspecialattack);
+                    }
+
 
 
                         clockenemy.restart();
@@ -1433,6 +1590,7 @@ void Game_Play(RenderWindow& window)
                     player1.sprite.setTexture(playerTexture[1]);
                     player1.move_x = 0.1;
                     attack = 1;
+                    attackSound.play();
                 }
 
                 if (Keyboard::isKeyPressed(Keyboard::Z))
@@ -1440,10 +1598,35 @@ void Game_Play(RenderWindow& window)
                     player1.sprite.setTexture(playerTexture[1]);
                     player1.move_x = -0.1;
                     attack = 1;
+                    attackSound.play();
                 }
+                if (Keyboard::isKeyPressed(Keyboard::P))
+                {
+                    specialswitch = true;
+                    player1.sprite.setPosition(200, 800);
+                }
+                if (specialswitch) {
+                    switchCharacter(player1, specialwalktext);
+                    if (Keyboard::isKeyPressed(Keyboard::Right))
+                    {
+                        switchCharacter(player1, specialwalktext);
+                        player1.move_x = 0.25;
+                    }
+                    if (Keyboard::isKeyPressed(Keyboard::Left))
+                    {
+                        switchCharacter(player1, specialwalktext);
+
+                        player1.move_x = -0.25;
+                    }
+                    if (Keyboard::isKeyPressed(Keyboard::X))
+                    {
+                        switchCharacter(player1, specialattacktext);
+                        player1.move_x = 0.25;
+                        attack = 1;
+                    }
 
 
-
+                }
                 if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(wol.getGlobalBounds()))) {
                     wolfdamage = true;
                     keyPressed = false;
@@ -1462,6 +1645,10 @@ void Game_Play(RenderWindow& window)
                     wolf2.spritee.move(0, 0);
                     wolf2speed = 0;
                     wolf2.spritee.setPosition(8000.f, 8000.f);
+                }
+                if (healthwolf2 == 0 && enemyHealth["wolf2h"] == 0) {
+                    enemySound.play();
+                    enemyHealth["wolf2h"] = 1;
                 }
                 if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(cen.getGlobalBounds()))) {
                     wolfdamage = true;
@@ -1638,6 +1825,10 @@ void Game_Play(RenderWindow& window)
                     demonspeed = 0;
                     demon.spritee.setPosition(8000.f, 8000.f);
                 }
+                if (healthdemon == 0 && enemyHealth["demonh"] == 0) {
+                    enemySound.play();
+                    enemyHealth["demonh"] = 1;
+                }
                 if (healthmud == 0) {
                     //   fadeSprite(demon.spritee, death, 3.f);
 
@@ -1664,159 +1855,33 @@ void Game_Play(RenderWindow& window)
                     wolf2.spritee.setTexture(wolfdeadtexture);
                     wolf2.spritee.setTextureRect(rectsourcewolfdead);
                 }
-
-
-                /*  if (Keyboard::isKeyPressed(Keyboard::Z)&&(pl.getGlobalBounds().intersects(wol.getGlobalBounds())))
-                  {
-                      player1.sprite.setTexture(playerTexture[1]);
-                      player1.move_x = -0.25;
-                      attack = 1;
-                      if (healthwolf > 0)
-                          healthwolf--;
-                  }*/
-                  /* if (wolfdamage == true && !Keyboard::isKeyPressed(Keyboard::Z))
-                       wolfdamage = false;*/
-
-
-
-                       /*  if (attack == true) {
-
-                        // }*///Time elapsed;
-                        //cout << healthdemon << endl;
-                        // 
-                        //// cout << healthwolf << endl;
-
-                        // if (healthwolf == 0&&!fading) {
-                        //     
-                        //     fading = true;
-                        //    wolfdead = true;
-                        //    wolfspeed = 0;
-                        //    wolf.setScale(2.2, 2.2);
-                        //    death.restart();
-
-                        //    elapsed = death.getElapsedTime();
-                        //    
-
-                        // }
-                        //
-                        //      if (healthcent == 0 && !fading) {
-                        //     fading = true;
-
-                        //     centdead = true;
-                        //     centspeed = 0;
-                        //     centipede.setScale(2.2, 2.2);
-                        //     death.restart();
-
-                        //     elapsed = death.getElapsedTime();
-                        // }
-
-                        // 
-                        //   if (healthdemon == 0&&!fading) {
-                        //     fading = true;
-
-                        //     demondead = true;
-                        //     demonspeed = 0;
-                        //     demon.setScale(2.2, 2.2);
-                        //     //   healthdemon = -1;
-                        //     death.restart();
-
-                        //     elapsed = death.getElapsedTime();
-
-                        // }
-
-                       //  if (healthdemon >= 0)
-                         //    death.restart();
-                            // if (death.getElapsedTime().asSeconds() - elapsed.asSeconds() >= 3 && demondead == true)
-                            // {
-                       //  if (death.getElapsedTime().asSeconds() >= 3.f && demondead == true) {
-                         //    demon.setScale(0, 0);
-
-
-                           //  deaddem = true;
-                        //// }         
-                         //if (fading) {
-                         //    // Calculate the alpha value based on elapsed time and fade duration
-                         //    float alpha = 255 * (1 - (death.getElapsedTime().asSeconds() - elapsed.asSeconds()) / fadeDuration);
-                         //    if (alpha <= 0) {
-                         //        alpha = 0; // Ensure alpha doesn't go below 0
-                         //        fading = false;
-                         //        faded = true;
-                         //     
-
-                         //    }
-                         //    if (faded&&demondead) {
-                         //        
-                         //        demon.setScale(0, 0);
-                         //      
-                         //    }
-                         //    if (faded && centdead) {
-                         //        centspeed = 0;
-
-                         //        centipede.setScale(0, 0);
-                         //    }
-                         //    if (faded && wolfdead) {
-                         //        wolf.setScale(0, 0);
-                         //    }
-                         //        
-
-
-                         //    sf::Color color = demon.getColor();
-                         //    color.a = static_cast<sf::Uint8>(alpha);
-                         //    demon.setColor(color);
-                         //    if (alpha == 0) {
-                         //        fading = false;
-                         //        //  death.restart();
-                         //        
-                         //    }
-                         //}
-
-                     /*    if (deaddem == true){
-                             cout << "dead";
-
-                         }
-                     */
-
-
-                     // if (demondead == true)
-                         // demonspeed = 0;
-                          //wolf.setScale(0, 0);
-                      //to make player stop when collides with an obsatcle 
-
-                //if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
-
-                //  // Display the letter transition
-                //   displayLetterTransition(window, letter2Sprite, transitionTriggered, cam);
-                //   // window.draw(letter1Sprite);
-                //    handleLevelTransition(background, player1, playerPosition, level2texture, ob1, ob2, ob3, ob4, ob3tex, ob4tex, ob2tex, ob1tex);
-
-                //}
-                //       // Display the letter only once the falling animation is finished
-                //      if (showLetter && !letterDisplayed) {
-                //        // Assuming you have already loaded your transition sprite
-                //            cout << "DONE" << endl;
-                //        // Replace "transitionSprite" with your actual sprite variable
-                //        displayLetterTransition(window, letter1Sprite, transitionTriggered, cam);
-                //        // window.draw(letter1Sprite);
-                //         showLetter = false;
-                //         letterDisplayed = true; // Update the flag to indicate that the letter has been displayed
-                //      }
-
-
-                if (player1.sprite.getGlobalBounds().intersects(reclevel3.getGlobalBounds())) {
-                    displayLetterTransition(window, letter3Sprite, transitionTriggered, cam);
-                    Level3Transition(background, player1, playerPosition, level3texture);
+                if (healthcent == 0) {
+                    fadeSprite(centipede.spritee, cent, 3.f);
+                    centspeed = 0;
+                    centipede.spritee.setPosition(8000.f, 8000.f);
+                    //     centipede.setScale(0, 0);
+                }
+                if (healthcent == 0 && enemyHealth["cent1h"] == 0) {
+                    enemySound.play();
+                    enemyHealth["cent1h"] == 1;
                 }
 
+           
+                 if (player1.sprite.getGlobalBounds().intersects(reclevel3.getGlobalBounds())) {
+                    displayLetterTransition(window, letter3Sprite, transitionTriggered, cam,paperSound);
+                    Level3Transition(background, player1, playerPosition, level3texture);
+                 }
 
-                if (!levelTransitionCompleted) {
+
+                 if (!levelTransitionCompleted) {
                     for (int i = 0; i < 9; i++) {
-                        if (isColliding(rec, ob1[i])) {
+                         if (isColliding(rec, ob1[i])) {
 
                             player1.move_x = 0;
                         }
                     }
-                    for (int i = 0; i < 9; i++) {
-                        if (isColliding(rec, ob2[i])) {
+                     for (int i = 0; i < 9; i++) {
+                         if (isColliding(rec, ob2[i])) {
                             if (i == 5) {
                                 continue;
                             }
@@ -1920,12 +1985,8 @@ void Game_Play(RenderWindow& window)
                             centipede.spritee.setTexture(Centipededeadtexture);
                             centipede.spritee.setTextureRect(rectsourcecentdead);
                         }
-                        if (healthcent == 0) {
-                            fadeSprite(centipede.spritee, cent, 3.f);
-                            centspeed = 0;
-                            centipede.spritee.setPosition(8000.f, 8000.f);
-                            //     centipede.setScale(0, 0);
-                        }
+
+                      
 
                         if ((centipede.spritee.getPosition().x < pl.getPosition().x) && (centwalking = true) || (centipede.spritee.getPosition().x <= 3000.f)) {
                             centwalking = true;
@@ -1947,7 +2008,7 @@ void Game_Play(RenderWindow& window)
 
                         for (int i = 0; i < 9; i++) {
                             if (isColliding(rec, ob5[i])) {
-                               
+
                                 player1.move_x = 0;
                             }
                         }
@@ -2040,7 +2101,7 @@ void Game_Play(RenderWindow& window)
                         }
 
 
-                        if ((wol.getPosition().x < pl.getPosition().x) && (wolfwalking = true) || (wol.getPosition().x <= 2000.f)) {
+                        if ((wol.getPosition().x < pl.getPosition().x) && (wolfwalking = true) || (wol.getPosition().x <= 4000.f)) {
                             wolfwalking = true;
                             wolfattacking = false;
                             wolf.spritee.setScale(3.f, 3.f);
@@ -2075,12 +2136,22 @@ void Game_Play(RenderWindow& window)
                             wolf.spritee.move(0, 0);
                             wolfspeed = 0;
                             wolf.spritee.setPosition(8000.f, 8000.f);
+                          
+                        }
+                        if (healthwolf == 0 && enemyHealth["wolfh"] == 0) {
+                            enemySound.play();
+                            enemyHealth["wolfh"] = 1;
                         }
                         if (healthcent2 == 0) {
                             fadeSprite(centipede2.spritee, cent, 3.f);
                             centspeed2 = 0;
                             centipede2.spritee.setPosition(8000.f, 8000.f);
+                           
                             //     centipede.setScale(0, 0);
+                        }
+                        if (healthcent2 == 0 && enemyHealth["cent2h"] == 0) {
+                            enemySound.play();
+                            enemyHealth["cent2h"] = 1;
                         }
                     }
                 }
@@ -2132,7 +2203,12 @@ void Game_Play(RenderWindow& window)
                 {
                     player1.sprite.setTexture(playerTexture[2]);
                     player1.update(timer, 2);
+                    displayLetterTransition(window, gameOver, transitionTriggered, cam,deathSound);
                     gameisov = true;
+                    sound.stop();
+                    againSound.play();
+                    againSound.setLoop(true);
+
 
                 }
 
@@ -2150,7 +2226,8 @@ void Game_Play(RenderWindow& window)
                 window.draw(phealth);
                 window.draw(hpp);
                 window.draw(demon.spritee);
-                window.draw(wolf2.spritee);
+                window.draw(waechter.spritee);
+             
 
 
                 //window.draw(rec);
@@ -2184,7 +2261,7 @@ void Game_Play(RenderWindow& window)
                 if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
 
                     // Display the letter transition
-                    displayLetterTransition(window, letter2Sprite, transitionTriggered, cam);
+                    displayLetterTransition(window, letter2Sprite, transitionTriggered, cam,paperSound);
                     // window.draw(letter1Sprite);
                     handleLevelTransition(background, player1, playerPosition, level2texture, ob1, ob2, ob3, ob4, ob3tex, ob4tex, ob2tex, ob1tex);
 
@@ -2194,7 +2271,7 @@ void Game_Play(RenderWindow& window)
                     // Assuming you have already loaded your transition sprite
                     cout << "DONE" << endl;
                     // Replace "transitionSprite" with your actual sprite variable
-                    displayLetterTransition(window, letter1Sprite, transitionTriggered, cam);
+                    displayLetterTransition(window, letter1Sprite, transitionTriggered, cam,paperSound);
                     showLetter = false;
                     letterDisplayed = true; // Update the flag to indicate that the letter has been displayed
                 }
@@ -2217,9 +2294,9 @@ void Game_Play(RenderWindow& window)
 
 
 
-                        window.draw(mud.spritee);
+               
 
-
+                        window.draw(wolf2.spritee);
                         window.draw(centipede.spritee);
 
                         // window.draw(cen);
@@ -2230,6 +2307,7 @@ void Game_Play(RenderWindow& window)
                         for (int i = 0; i < 9; i++) {
                             window.draw(ob5[i]);
                         }
+                        window.draw(mud.spritee);
                         window.draw(wolf.spritee);
                         window.draw(centipede2.spritee);
                     }
@@ -2258,11 +2336,13 @@ void Game_Play(RenderWindow& window)
 
                 if (isMousePressed && resumeButton.isClicked(mousePosition)) {
                     isPaused = false; // Resume the game
-
+                    pauseSound.stop();
+                    sound.play();
                 }
 
                 if (isMousePressed && quitButtonpuase.isClicked(mousePosition)) {
                     window.close(); // Close the window
+                    pauseSound.stop();
                     cout << "Quit button clicked!" << endl;
                 }
 
@@ -2273,6 +2353,7 @@ void Game_Play(RenderWindow& window)
         }
         else
         {
+           // displayLetterTransition(window, tryLetter, transitionTriggered,cam);
             sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
             bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
@@ -2291,11 +2372,21 @@ void Game_Play(RenderWindow& window)
 
             if (isMousePressed && restartButton.isClicked(mousePosition))
             {
+                 healthwolf = 35;
+                healthwolf2 = 25;
+                healthcent = 20;
+            healthcent2 = 20;
+
+               healthmud = 15;
+                healthdemon = 25;
                 gameisov = false; // Resume the game
-                health = 50;
+                health = 40;
                 level3Completed = false;
                 levelTransitionCompleted = false;
+                againSound.stop();
                 Game_Play(window);
+
+
             }
 
             if (isMousePressed && quitButtongameover.isClicked(mousePosition))
