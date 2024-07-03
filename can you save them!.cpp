@@ -24,6 +24,13 @@ int healthmud = 15;
 bool mudhurt = false;
 bool mudd;
 
+bool necklace = 1;
+bool ballon = 1;
+bool arrow = 1;
+bool torch = 1;
+bool tool2 = 1;
+bool diamond = 1, fire = 1, tool1 = 1;
+bool evid = true;
 
 bool specialswitch = false;
 bool win = 0;
@@ -351,12 +358,21 @@ void displayTransition(RenderWindow& window, const Font& font, const SoundBuffer
 }
 void switchCharacter(player& player, const Texture& newTexture) {
     player.sprite.setTexture(newTexture);
-    player.sprite.setScale(3.0f, 3.0f);
-    //  player.sprite.setOrigin(10 / 2 , 0);
+    /* player.sprite.setScale(3.0f, 3.0f);
+     player.sprite.setOrigin(65, 65);*/
 
 
-      // Additional setup or logic for switching characters if needed
+     // Additional setup or logic for switching characters if needed
 }
+void switchCharacter2(player& player, const Texture& newTexture) {
+    player.sprite.setTexture(newTexture);
+    player.sprite.setScale(2.0f, 2.0f);
+    player.sprite.setPosition(200, 1600);
+
+
+    // Additional setup or logic for switching characters if needed
+}
+
 
 void Game_Play(RenderWindow& window);
 struct Button {
@@ -375,7 +391,7 @@ struct Button {
         return text.getGlobalBounds().contains(point);
     }
 
-    
+
 
     void setTextColor(Color color) {
         text.setFillColor(color);
@@ -535,7 +551,7 @@ int main()
         cerr << "Failed to load haunted house image!" << endl;
         return -1;
     }
- 
+
     Sprite backTheme_1(backThemeTexture);
     Sprite backTheme_2(backThemeTexture);
     Sprite backTheme_buffer(backThemeTexture); // New sprite acting as a buffer
@@ -631,7 +647,7 @@ int main()
 
         if (introSkipped) {
             displaySplashScreen(window, splashTexture, font1, sound3);
-            
+
         }
         else {
             // Move backgrounds horizontally
@@ -855,6 +871,18 @@ void Game_Play(RenderWindow& window)
     bool attack = 0;
     bool dead = 0;
 
+
+    Texture specialwalktext;
+    IntRect rectspecialwalk;
+    loadTextureAndRect(specialwalktext, rectspecialwalk, "onre_walk.png", 128, 128);
+
+    Texture specialattacktext;
+    IntRect rectspecialattack;
+    loadTextureAndRect(specialattacktext, rectspecialattack, "onre_Attack_2.png", 128, 128);
+
+
+
+
     Texture Enemyphoto;
     Enemyphoto.loadFromFile("Snake_walk.png");
     Texture Enemyattack;
@@ -952,6 +980,26 @@ void Game_Play(RenderWindow& window)
     enemy11.sprite.setPosition(enemy11.ip_x, enemy11.ip_y);
     enemy11.chase_range = 200;
 
+    Enemy enemy12;
+    enemy12.init(Enemyphoto);
+    enemy12.sprite.setScale(3.5, 3);
+    enemy12.sprite.setTextureRect(IntRect(0, 0, 48, 48));
+    enemy12.ip_x = 3700;
+    enemy12.ip_y = 690;
+    enemy12.sprite.setPosition(enemy12.ip_x, enemy12.ip_y);
+    enemy12.chase_range = 200;
+
+    Enemy enemy13;
+    enemy13.init(Enemyphoto);
+    enemy13.sprite.setScale(3.5, 3);
+    enemy13.sprite.setTextureRect(IntRect(0, 0, 48, 48));
+    enemy13.ip_x = 4600;
+    enemy13.ip_y = 690;
+    enemy13.sprite.setPosition(enemy13.ip_x, enemy13.ip_y);
+    enemy13.chase_range = 200;
+
+
+
 
     Texture Enemy3photo;
     Enemy3photo.loadFromFile("gWalk (1).png");
@@ -968,12 +1016,23 @@ void Game_Play(RenderWindow& window)
     enemy3stunned.loadFromFile("gStunned.png");
     Enemy enemy3;
     enemy3.init(Enemy3photo);
-    enemy3.sprite.setScale(1.8, 1.8);
+    enemy3.sprite.setScale(2, 2);
     enemy3.sprite.setTextureRect(IntRect(0, 0, 128, 128));
-    enemy3.ip_x = 850;
-    enemy3.ip_y = 600;
+    enemy3.ip_x = 2800;
+    enemy3.ip_y = 575;
     enemy3.sprite.setPosition(enemy3.ip_x, enemy3.ip_y);
     enemy3.chase_range = 200;
+
+    Enemy enemy14;
+    enemy14.init(Enemy3photo);
+    enemy14.sprite.setScale(2, 2);
+    enemy14.sprite.setTextureRect(IntRect(0, 0, 128, 128));
+    enemy14.ip_x = 5500;
+    enemy14.ip_y = 575;
+    enemy14.sprite.setPosition(enemy14.ip_x, enemy14.ip_y);
+    enemy14.chase_range = 200;
+
+
 
     RectangleShape pl2(Vector2f(50.f, 50.f));
     pl2.setFillColor(sf::Color::Red);
@@ -1032,17 +1091,25 @@ void Game_Play(RenderWindow& window)
     snake11.setPosition(enemy11.sprite.getPosition().x + 20.f, enemy11.sprite.getPosition().y + 70.f);
     snake11.setSize(Vector2f(78, 68));
 
+    RectangleShape snake12(Vector2f(50.f, 50.f));
+    snake12.setFillColor(sf::Color::Green);
+    snake12.setPosition(enemy12.sprite.getPosition().x + 20.f, enemy12.sprite.getPosition().y + 70.f);
+    snake12.setSize(Vector2f(78, 68));
+
+    RectangleShape snake13(Vector2f(50.f, 50.f));
+    snake13.setFillColor(sf::Color::Green);
+    snake13.setPosition(enemy13.sprite.getPosition().x + 20.f, enemy13.sprite.getPosition().y + 70.f);
+    snake13.setSize(Vector2f(78, 68));
 
     RectangleShape b(Vector2f(50.f, 50.f));
     b.setFillColor(sf::Color::Magenta);
-    b.setPosition(enemy3.sprite.getPosition().x + 90.f, enemy3.sprite.getPosition().y + 100.f);
-    b.setSize(Vector2f(50, 120));
+    b.setPosition(enemy3.sprite.getPosition().x + 100.f, enemy3.sprite.getPosition().y + 100.f);
+    b.setSize(Vector2f(30, 30));
 
-    RectangleShape t(Vector2f(50.f, 50.f));
-    t.setFillColor(sf::Color::Yellow);
-    t.setPosition(enemy3.ip_x, enemy3.ip_y + 150);
-    t.setSize(Vector2f(40, 40));
-
+    RectangleShape b2(Vector2f(50.f, 50.f));
+    b2.setFillColor(sf::Color::Magenta);
+    b2.setPosition(enemy14.sprite.getPosition().x + 100.f, enemy14.sprite.getPosition().y + 100.f);
+    b2.setSize(Vector2f(30, 30));
 
     Texture level1texture;
     level1texture.loadFromFile("back1new.png");
@@ -1111,6 +1178,12 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite winLetter(winTexture);
+    Texture eviTexture;
+    if (!eviTexture.loadFromFile("eviLetter.png")) {
+        cerr << "Failed to load over\n";
+        return;
+    }
+    Sprite eviLetter(eviTexture);
     /*Texture tryTexture;
     if (tryTexture.loadFromFile("try.png")) {
         cerr << "Failed to load try nela\n";
@@ -1123,7 +1196,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite necklaceSprite(necklaceTexture);
-    necklaceSprite.setPosition(400, 400);
+    necklaceSprite.setPosition(500, 500);
     necklaceSprite.setScale(2, 2);
 
     Texture ballonTexture;
@@ -1132,7 +1205,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite ballonSprite(ballonTexture);
-    ballonSprite.setPosition(700, 400);
+    ballonSprite.setPosition(2200, 3000);
     ballonSprite.setScale(2, 2);
 
     Texture keyTexture;
@@ -1141,7 +1214,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite keySprite(keyTexture);
-    keySprite.setPosition(1000, 400);
+    keySprite.setPosition(2000, 3000);
     keySprite.setScale(2, 2);
 
     Texture arrowTexture;
@@ -1150,7 +1223,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite arrowSprite(arrowTexture);
-    arrowSprite.setPosition(1300, 400);
+    arrowSprite.setPosition(2550, 3000);
     arrowSprite.setScale(2, 2);
 
     Texture torchTexture;
@@ -1159,7 +1232,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite torchSprite(torchTexture);
-    torchSprite.setPosition(1500, 400);
+    torchSprite.setPosition(3500, 3000);
     torchSprite.setScale(2, 2);
 
     Texture tool2Texture;
@@ -1168,7 +1241,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite tool2Sprite(tool2Texture);
-    tool2Sprite.setPosition(1800, 400);
+    tool2Sprite.setPosition(1000, 620);
     tool2Sprite.setScale(2, 2);
 
     Texture diamondTexture;
@@ -1177,7 +1250,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite diamondSprite(diamondTexture);
-    diamondSprite.setPosition(2100, 400);
+    diamondSprite.setPosition(3500, 600);
     diamondSprite.setScale(2, 2);
 
     Texture fireTexture;
@@ -1186,7 +1259,7 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite fireSprite(fireTexture);
-    fireSprite.setPosition(2400, 400);
+    fireSprite.setPosition(6000, 550);
     fireSprite.setScale(2, 2);
 
     Texture tool1Texture;
@@ -1195,8 +1268,10 @@ void Game_Play(RenderWindow& window)
         return;
     }
     Sprite tool1Sprite(tool1Texture);
-    tool1Sprite.setPosition(2700, 400);
+    tool1Sprite.setPosition(3400, 500);
     tool1Sprite.setScale(2, 2);
+
+
 
     SoundBuffer attacksoundBuffer;
     if (!attacksoundBuffer.loadFromFile("attacks.wav")) {
@@ -1249,13 +1324,20 @@ void Game_Play(RenderWindow& window)
 
     SoundBuffer bossBattleBuffer;
     if (!bossBattleBuffer.loadFromFile("bossBa.wav")) {
-        cerr << "Failed to load sound!" << endl;
+        cerr << "Failed to bossBa load sound!" << endl;
 
     }
     Sound bossBattleSound;
     bossBattleSound.setBuffer(bossBattleBuffer);
 
 
+    SoundBuffer eviBuffer;
+    if (!eviBuffer.loadFromFile("evid.flac")) {
+        cerr << "Failed to evi load sound!" << endl;
+
+    }
+    Sound eviSound;
+    eviSound.setBuffer(eviBuffer);
 
     SoundBuffer soundBuffer;
     if (!soundBuffer.loadFromFile("gameLoop.wav")) {
@@ -1282,39 +1364,35 @@ void Game_Play(RenderWindow& window)
     pl.setFillColor(Color::Red); // Set its color
     pl.setPosition(50.f, 300.f); //
 
-    RectangleShape wol(Vector2f(50.f, 50.f)); 
+    RectangleShape wol(Vector2f(50.f, 50.f));
     wol.setFillColor(Color::Blue); // Set its color
     wol.setPosition(50.f, 300.f); //
 
-    RectangleShape dem(Vector2f(50.f, 50.f)); 
+    RectangleShape dem(Vector2f(50.f, 50.f));
     dem.setFillColor(Color::Blue); // Set its color
     dem.setPosition(50.f, 300.f); //
     RectangleShape cen(Vector2f(50.f, 50.f));
-    cen.setFillColor(Color::Blue); 
+    cen.setFillColor(Color::Blue);
     cen.setPosition(50.f, 300.f); //
 
     setupSprite(waechter, 500.f, 750.f, 2.f, 2.f, 96 / 2, 96 / 2);
     Texture waechterwalktext;
     IntRect rectwaechterwalk;
     loadTextureAndRect(waechterwalktext, rectwaechterwalk, "waechter_walk.png", 96, 96);
-    Texture specialwalktext;
-    IntRect rectspecialwalk;
-    loadTextureAndRect(specialwalktext, rectspecialwalk, "special_walk.png", 65, 100);
+
     Sprite sister;
     Texture sistertext;
     sistertext.loadFromFile("Idle_KG_1.png");
-    sister.setPosition(7600, 740);
+    sister.setPosition(7600, 640);
     sister.setScale(-2.f, 2.f);
 
     const int frameWidth = 55;
-    const int frameHeight = 67; 
+    const int frameHeight = 67;
     const int numFrames = 4;
     const int sheetWidth = frameWidth * numFrames;
     IntRect textureRect(0, 0, frameWidth, frameHeight);
 
-    Texture specialattacktext;
-    IntRect rectspecialattack;
-    loadTextureAndRect(specialattacktext, rectspecialattack, "special_attack.png", 128, 100);
+
 
 
     /* Sprite wolfff;
@@ -1429,6 +1507,11 @@ void Game_Play(RenderWindow& window)
     LastCollisionTime enemy9t;
     LastCollisionTime enemy10t;
     LastCollisionTime enemy11t;
+    LastCollisionTime enemy12t;
+    LastCollisionTime enemy13t;
+    LastCollisionTime enemy3t;
+    LastCollisionTime enemy14t;
+
 
 
     // Define the delay duration (e.g., 2 seconds)
@@ -1470,7 +1553,7 @@ void Game_Play(RenderWindow& window)
         }
 
         window.clear(Color(0, 0, 0, 128));
-      Vector2f cameraCenter = cam.getCenter();
+        Vector2f cameraCenter = cam.getCenter();
 
         pausePicture.setPosition(cameraCenter - Vector2f(pausePicture.getGlobalBounds().width / 2.f, pausePicture.getGlobalBounds().height / 2.f));
         pause.setPosition(Vector2f(pausePicture.getPosition().x + pausePicture.getGlobalBounds().width / 3.7f, pausePicture.getPosition().y + 110));
@@ -1496,6 +1579,17 @@ void Game_Play(RenderWindow& window)
             bossBattleSound.setLoop(true);
 
         }
+        //AFTER COLLECTING ALL THE EVIDENCE!!!!!!!!!!!!
+        if (!necklace &&
+            !ballon &&
+            !arrow &&
+            !torch &&
+            !tool2 &&
+            !diamond && !fire && !tool1 && evid == true) {
+            displayLetterTransition(window, eviLetter, transitionTriggered, cam, paperSound);
+            health = 25;
+            evid = false;
+        }
 
         if (!levelTransitionCompleted) {
             for (int i = 0; i < 9; ++i) {
@@ -1518,6 +1612,25 @@ void Game_Play(RenderWindow& window)
 
                 }
 
+                if (isColliding(rec, necklaceSprite)) {
+                    necklace = 0; eviSound.play();
+                }
+                if (isColliding(rec, ballonSprite)) {
+                    ballon = 0;  eviSound.play();
+                } if (isColliding(rec, arrowSprite)) {
+                    arrow = 0;  eviSound.play();
+                } if (isColliding(rec, torchSprite)) {
+                    torch = 0;  eviSound.play();
+                } if (isColliding(rec, tool2Sprite)) {
+                    tool2 = 0;  eviSound.play();
+
+                } if (isColliding(rec, diamondSprite)) {
+                    diamond = 0;  eviSound.play();
+                } if (isColliding(rec, fireSprite)) {
+                    fire = 0;  eviSound.play();
+                } if (isColliding(rec, keySprite)) {
+                    tool1 = 0;  eviSound.play();
+                }
 
                 if (isColliding(rec, ob2[i])) {
                     auto currentTime = std::chrono::steady_clock::now();
@@ -1543,9 +1656,7 @@ void Game_Play(RenderWindow& window)
             snake2.setPosition(enemy2.sprite.getPosition().x + 20.f, enemy2.sprite.getPosition().y + 70.f);
             snake4.setPosition(enemy4.sprite.getPosition().x + 20.f, enemy4.sprite.getPosition().y + 70.f);
             snake5.setPosition(enemy5.sprite.getPosition().x + 20.f, enemy5.sprite.getPosition().y + 70.f);
-            b.setPosition(enemy3.sprite.getPosition().x + 90.f, enemy3.sprite.getPosition().y + 100.f);
-            t.setPosition(enemy3.ip_x, enemy3.ip_y + 150);
-
+            
             //enemy1
             if (player1.sprite.getPosition().x < (enemy1.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy1.sprite.getPosition().x + 300)) {
                 enemy1.move_x = -0.25;
@@ -1829,9 +1940,34 @@ void Game_Play(RenderWindow& window)
                     snake5.setPosition(90000, 80000);
                 }
             }
+
         }
         else {
             if (!level3Completed) {
+                if (isColliding(rec, necklaceSprite)) {
+                    necklace = 0; eviSound.play();
+                }
+                if (isColliding(rec, ballonSprite)) {
+                    ballon = 0; eviSound.play();
+                } if (isColliding(rec, arrowSprite)) {
+                    arrow = 0; eviSound.play();
+                } if (isColliding(rec, torchSprite)) {
+                    torch = 0; eviSound.play();
+                } if (isColliding(rec, tool2Sprite)) {
+                    tool2 = 0; eviSound.play();
+
+                } if (isColliding(rec, diamondSprite)) {
+                    diamond = 0; eviSound.play();
+                } if (isColliding(rec, fireSprite)) {
+                    fire = 0; eviSound.play();
+                } if (isColliding(rec, keySprite)) {
+                    tool1 = 0; eviSound.play();
+                }
+                ballonSprite.setPosition(500, 600);
+                keySprite.setPosition(2000, 550);
+                arrowSprite.setPosition(4450, 552);
+                torchSprite.setPosition(3000, 650);
+
                 for (int i = 0; i < 9; ++i) {
                     if (isColliding(rec, ob3[i])) {
                         auto currentTime = std::chrono::steady_clock::now();
@@ -2173,8 +2309,29 @@ void Game_Play(RenderWindow& window)
 
             }
             else {
+
                 reclevel3.setPosition(9000.f, 750.f);
                 //handle enemies and letters in level3
+                if (isColliding(rec, necklaceSprite)) {
+                    necklace = 0; eviSound.play();
+                }
+                if (isColliding(rec, ballonSprite)) {
+                    ballon = 0; eviSound.play();
+                } if (isColliding(rec, arrowSprite)) {
+                    arrow = 0; eviSound.play();
+                } if (isColliding(rec, torchSprite)) {
+                    torch = 0; eviSound.play();
+                } if (isColliding(rec, tool2Sprite)) {
+                    tool2 = 0; eviSound.play();
+
+                } if (isColliding(rec, diamondSprite)) {
+                    diamond = 0; eviSound.play();
+                } if (isColliding(rec, fireSprite)) {
+                    fire = 0; eviSound.play();
+                } if (isColliding(rec, keySprite)) {
+                    tool1 = 0; eviSound.play();
+                }
+
                 for (int i = 0; i < 6; ++i) {
                     if (isColliding(rec, ob5[i])) {
                         auto currentTime = std::chrono::steady_clock::now();
@@ -2200,6 +2357,10 @@ void Game_Play(RenderWindow& window)
                 pl2.setPosition(player1.sprite.getPosition().x + 80.f, player1.sprite.getPosition().y + 80.f);
                 snake10.setPosition(enemy10.sprite.getPosition().x + 20.f, enemy10.sprite.getPosition().y + 70.f);
                 snake11.setPosition(enemy11.sprite.getPosition().x + 20.f, enemy11.sprite.getPosition().y + 70.f);
+                snake12.setPosition(enemy12.sprite.getPosition().x + 20.f, enemy12.sprite.getPosition().y + 70.f);
+                snake13.setPosition(enemy13.sprite.getPosition().x + 20.f, enemy13.sprite.getPosition().y + 70.f);
+                b.setPosition(enemy3.sprite.getPosition().x + 90.f, enemy3.sprite.getPosition().y + 100.f);
+                b2.setPosition(enemy14.sprite.getPosition().x + 90.f, enemy14.sprite.getPosition().y + 100.f);
 
 
 
@@ -2348,8 +2509,294 @@ void Game_Play(RenderWindow& window)
                     }
                 }
 
+                //enemy12
+                if (player1.sprite.getPosition().x < (enemy12.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy12.sprite.getPosition().x + 300)) {
+                    enemy12.move_x = -0.25;
 
-              }
+                    if ((enemy12.sprite.getPosition().x) < (enemy12.ip_x - enemy12.chase_range) || (enemy12.sprite.getPosition().x > (enemy12.ip_x + enemy12.chase_range)))
+                        enemy12.direction *= -1;
+
+                    enemy12.move_x *= enemy12.direction;
+                    enemy12.sprite.move(enemy12.move_x, 0);
+                }
+                else {
+                    enemy12.attack = true;
+
+                    if (player1.sprite.getPosition().x < (enemy12.sprite.getPosition().x))
+                        enemy12.direction = -1;
+
+                    else if (player1.sprite.getPosition().x >= (enemy12.sprite.getPosition().x)) {
+                        enemy12.direction = 1;
+                    }
+
+                    enemy12.move_x = enemy12.direction * 0.2;
+                }
+
+                if (enemy12.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy12.sprite.getPosition().x > player1.sprite.getPosition().x)
+                    enemy12.move_x = 0;
+
+                if (enemy12.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy12.sprite.getPosition().x < player1.sprite.getPosition().x)
+                    enemy12.move_x = 0;
+
+                if (pl2.getGlobalBounds().intersects(snake12.getGlobalBounds())) {
+
+                    if (player1.sprite.getPosition().x <= snake12.getPosition().x) {
+                        player1.rect.left = snake12.getPosition().x - 170;
+
+                        auto currentTime = std::chrono::steady_clock::now();
+                        auto timeSinceLastCollision = currentTime - enemy12t.time;
+
+                        // Check if enough time has passed since the last collision
+                        if (timeSinceLastCollision >= delayDuration) {
+
+                            health--;
+                            cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
+                            enemy12t.time = currentTime; // Update last collision time
+                        }
+
+                    }
+
+
+                    float player_bottom = pl2.getPosition().y + height;
+                    float snake12_top = snake12.getPosition().y + 20;
+                    if (player_bottom < snake12_top) {
+                        enemy12.dead = true;
+                        enemySound.play();
+
+                    }
+
+                }
+
+                if (enemy12.dead == true) {
+                    enemy12.move_x = 0.001;
+                    if (enemy12.currentframe > 4) {
+                        enemy12.rectenemy.left = 90000;
+                        snake12.setPosition(90000, 80000);
+                    }
+                }
+
+                //enemy13
+                if (player1.sprite.getPosition().x < (enemy13.sprite.getPosition().x - 300) || player1.sprite.getPosition().x >(enemy13.sprite.getPosition().x + 300)) {
+                    enemy13.move_x = -0.25;
+
+                    if ((enemy13.sprite.getPosition().x) < (enemy13.ip_x - enemy13.chase_range) || (enemy13.sprite.getPosition().x > (enemy13.ip_x + enemy13.chase_range)))
+                        enemy13.direction *= -1;
+
+                    enemy13.move_x *= enemy13.direction;
+                    enemy13.sprite.move(enemy13.move_x, 0);
+                }
+                else {
+                    enemy13.attack = true;
+
+                    if (player1.sprite.getPosition().x < (enemy13.sprite.getPosition().x))
+                        enemy13.direction = -1;
+
+                    else if (player1.sprite.getPosition().x >= (enemy13.sprite.getPosition().x)) {
+                        enemy13.direction = 1;
+                    }
+
+                    enemy13.move_x = enemy13.direction * 0.2;
+                }
+
+                if (enemy13.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy13.sprite.getPosition().x > player1.sprite.getPosition().x)
+                    enemy13.move_x = 0;
+
+                if (enemy13.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy13.sprite.getPosition().x < player1.sprite.getPosition().x)
+                    enemy13.move_x = 0;
+
+                if (pl2.getGlobalBounds().intersects(snake13.getGlobalBounds())) {
+
+                    if (player1.sprite.getPosition().x <= snake13.getPosition().x) {
+                        player1.rect.left = snake13.getPosition().x - 170;
+
+                        auto currentTime = std::chrono::steady_clock::now();
+                        auto timeSinceLastCollision = currentTime - enemy13t.time;
+
+                        // Check if enough time has passed since the last collision
+                        if (timeSinceLastCollision >= delayDuration) {
+
+                            health--;
+                            cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
+                            enemy13t.time = currentTime; // Update last collision time
+                        }
+
+                    }
+
+
+                    float player_bottom = pl2.getPosition().y + height;
+                    float snake13_top = snake13.getPosition().y + 20;
+                    if (player_bottom < snake13_top) {
+                        enemy13.dead = true;
+                        enemySound.play();
+
+                    }
+
+                }
+
+                if (enemy13.dead == true) {
+                    enemy13.move_x = 0.001;
+                    if (enemy13.currentframe > 4) {
+                        enemy13.rectenemy.left = 90000;
+                        snake13.setPosition(90000, 80000);
+                    }
+                }
+
+                //enemy3
+                if (player1.sprite.getPosition().x < (enemy3.sprite.getPosition().x - 400) || player1.sprite.getPosition().x >(enemy3.sprite.getPosition().x + 400)) {
+                    enemy3.attack = false;
+                    enemy3.move_x = -0.18;
+
+                    if ((enemy3.sprite.getPosition().x) < (enemy3.ip_x - enemy3.chase_range) || (enemy3.sprite.getPosition().x > (enemy3.ip_x + enemy3.chase_range)))
+                        enemy3.direction *= -1;
+
+                    enemy3.move_x *= enemy3.direction;
+                    enemy3.sprite.move(enemy3.move_x, 0);
+                }
+                else {
+                    enemy3.attack = true;
+
+                    if (player1.sprite.getPosition().x < (enemy3.sprite.getPosition().x))
+                        enemy3.direction = -1;
+
+                    else if (player1.sprite.getPosition().x >= (enemy3.sprite.getPosition().x)) {
+                        enemy3.direction = 1;
+                    }
+
+                    enemy3.move_x = enemy3.direction * 0.25;
+                }
+
+                if (enemy3.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy3.sprite.getPosition().x > player1.sprite.getPosition().x) {
+                    enemy3.move_x = 0;
+                    enemy3.direction = 1;
+                }
+                if (enemy3.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy3.sprite.getPosition().x < player1.sprite.getPosition().x) {
+                    enemy3.move_x = 0;
+                    enemy3.direction = 1;
+                }
+
+                if (pl2.getGlobalBounds().intersects(b.getGlobalBounds())) {
+
+                    if (player1.sprite.getPosition().x <= b.getPosition().x) {
+                        player1.rect.left = b.getPosition().x - 500;
+
+                        auto currentTime = std::chrono::steady_clock::now();
+                        auto timeSinceLastCollision = currentTime - enemy3t.time;
+
+                        // Check if enough time has passed since the last collision
+                        if (timeSinceLastCollision >= delayDuration) {
+
+                            health--;
+                            cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
+                            enemy3t.time = currentTime; // Update last collision time
+                        }
+
+                    }
+                    float player_bottom = pl2.getPosition().y + height;
+                    float enemy3_top = b.getPosition().y + 40;
+                    if (player_bottom < enemy3_top) {
+                        enemy3.dead = true;
+                    }
+                }
+
+                if (enemy3.dead == true) {
+                    enemy3.move_x = 0.001;
+                    if (enemy3.currentframe > 4) {
+                        enemy3.rectenemy.left = 90000;
+                        b.setPosition(90000, 80000);
+                    }
+                }
+
+                //enemy14
+                if (player1.sprite.getPosition().x < (enemy14.sprite.getPosition().x - 400) || player1.sprite.getPosition().x >(enemy14.sprite.getPosition().x + 400)) {
+                    enemy14.attack = false;
+                    enemy14.move_x = -0.18;
+
+                    if ((enemy14.sprite.getPosition().x) < (enemy14.ip_x - enemy14.chase_range) || (enemy14.sprite.getPosition().x > (enemy14.ip_x + enemy14.chase_range)))
+                        enemy14.direction *= -1;
+
+                    enemy14.move_x *= enemy14.direction;
+                    enemy14.sprite.move(enemy14.move_x, 0);
+                }
+                else {
+                    enemy14.attack = true;
+
+                    if (player1.sprite.getPosition().x < (enemy14.sprite.getPosition().x))
+                        enemy14.direction = -1;
+
+                    else if (player1.sprite.getPosition().x >= (enemy14.sprite.getPosition().x)) {
+                        enemy14.direction = 1;
+                    }
+
+                    enemy14.move_x = enemy14.direction * 0.25;
+                }
+
+                if (enemy14.sprite.getPosition().x < player1.sprite.getPosition().x + 0.2 && enemy14.sprite.getPosition().x > player1.sprite.getPosition().x) {
+                    enemy14.move_x = 0;
+                    enemy14.direction = 1;
+                }
+                if (enemy14.sprite.getPosition().x > player1.sprite.getPosition().x - 0.2 && enemy14.sprite.getPosition().x < player1.sprite.getPosition().x) {
+                    enemy14.move_x = 0;
+                    enemy14.direction = 1;
+                }
+
+                if (pl2.getGlobalBounds().intersects(b.getGlobalBounds())) {
+
+                    if (player1.sprite.getPosition().x <= b.getPosition().x) {
+                        player1.rect.left = b.getPosition().x - 500;
+
+                        auto currentTime = std::chrono::steady_clock::now();
+                        auto timeSinceLastCollision = currentTime - enemy14t.time;
+
+                        // Check if enough time has passed since the last collision
+                        if (timeSinceLastCollision >= delayDuration) {
+
+                            health--;
+                            cout << health << endl;
+                            if (health <= 0)
+                            {
+                                player1.sprite.setTexture(playerTexture[2]);
+                                player1.move_x = 0.25;
+                                dead = 1;
+                            }
+                            enemy14t.time = currentTime; // Update last collision time
+                        }
+
+                    }
+                    float player_bottom = pl2.getPosition().y + height;
+                    float enemy14_top = b.getPosition().y + 40;
+                    if (player_bottom < enemy14_top) {
+                        enemy14.dead = true;
+                    }
+                }
+
+                if (enemy14.dead == true) {
+                    enemy14.move_x = 0.001;
+                    if (enemy14.currentframe > 4) {
+                        enemy14.rectenemy.left = 90000;
+                        b.setPosition(90000, 80000);
+                    }
+                }
+
+
+            }
         }
         if (health >= 0) {
             hpp.setScale(Vector2f((1.8 * (static_cast<float>(health) / 40)), 1.f));
@@ -2358,7 +2805,7 @@ void Game_Play(RenderWindow& window)
         {
             if (!isPaused) {
                 Vector2f mousePosition = window.mapPixelToCoords(Mouse::getPosition(window));
-                bool isMousePressed =Mouse::isButtonPressed(Mouse::Left);
+                bool isMousePressed = Mouse::isButtonPressed(Mouse::Left);
 
                 // sound.play();
                 float timer = clock.getElapsedTime().asMicroseconds();
@@ -2370,7 +2817,7 @@ void Game_Play(RenderWindow& window)
 
 
                 if (pl.getGlobalBounds().intersects(wolf2.spritee.getGlobalBounds())) {
-                  
+
                     wolfwalking = false;
                     wolfattacking1 = true;
                     wolf2.spritee.setScale(-2.5f, 2.5f);
@@ -2463,19 +2910,19 @@ void Game_Play(RenderWindow& window)
                         rectsourcewolfdead.left += 128;
                         if (rectsourcewolfdead.left >= 256)
                         {
-                          
+
                             rectsourcewolfdead.left = 128;
                         }
                         //currentFrame = (currentFrame + 1) % numFrames; // Loop through frames
                         //// Update the texture rectangle for the next frame
                         //textureRect.left = currentFrame * frameWidth;
-                        rectspecialwalk.left += 140;
-                        if (rectspecialwalk.left >= 180)
+                        rectspecialwalk.left += 128;
+                        if (rectspecialwalk.left >= 896)
                             rectspecialwalk.left = 0;
 
 
-                        rectspecialattack.left += 67;
-                        if (rectspecialattack.left >= 1120)
+                        rectspecialattack.left += 128;
+                        if (rectspecialattack.left >= 512)
                             rectspecialattack.left = 0;
 
 
@@ -2493,7 +2940,7 @@ void Game_Play(RenderWindow& window)
 
                         rectsourcecentdead.left += 72;
                         if (rectsourcecentdead.left >= 144) {
-                     
+
                             rectsourcecentdead.left = 144;
                         }
 
@@ -2507,7 +2954,7 @@ void Game_Play(RenderWindow& window)
 
                         rectdemondead.left += 65;
                         if (rectdemondead.left >= 512) {
-                          
+
                             rectdemondead.left = 448;
                         }
 
@@ -2522,7 +2969,7 @@ void Game_Play(RenderWindow& window)
                         rectmudhurt.left += 62;
                         if (rectmudhurt.left >= 248)
                             rectmudhurt.left = 0;
-               
+
 
                         if (wolfwalking == true) {
                             wolf.spritee.setTextureRect(rectsourcewolfwalk);
@@ -2534,7 +2981,7 @@ void Game_Play(RenderWindow& window)
                             wolf.spritee.setTexture(wolfattack1texture);
 
                         }
-                    
+
                         if (wolfhurting == true) {
                             wolf.spritee.setTexture(wolfhurttexture);
                             wolf.spritee.setTextureRect(rectsourcewolfhurt);
@@ -2603,7 +3050,7 @@ void Game_Play(RenderWindow& window)
                     }
                 }
 
-                
+
 
                 if (Keyboard::isKeyPressed(Keyboard::Right))
                 {
@@ -2654,14 +3101,31 @@ void Game_Play(RenderWindow& window)
                     attack = 1;
                     attackSound.play();
                 }
+
                 if (Keyboard::isKeyPressed(Keyboard::P))
                 {
                     specialswitch = true;
                     player1.sprite.setPosition(200, 800);
                 }
-                if (specialswitch) {
+                if (Keyboard::isKeyPressed(Keyboard::O))
+                {
+                    specialswitch = false;
+                    player1.sprite.setOrigin(65, 20);
+                    switchCharacter2(player1, specialwalktext);
+
+
+                    // player1.sprite.setPosition(200, 800);
+                }
+
+
+
+                if (specialswitch)
+                {
+                    player1.sprite.setScale(3, 3);
+                    player1.sprite.setOrigin(65, 55);
+
                     switchCharacter(player1, specialwalktext);
-                    if (Keyboard::isKeyPressed(Keyboard::Right))
+                    if (Keyboard::isKeyPressed(Keyboard::D))
                     {
                         switchCharacter(player1, specialwalktext);
                         player1.move_x = 0.25;
@@ -2678,10 +3142,17 @@ void Game_Play(RenderWindow& window)
                         player1.move_x = 0.25;
                         attack = 1;
                     }
+                    if (Keyboard::isKeyPressed(Keyboard::Z))
+                    {
+                        switchCharacter(player1, specialattacktext);
+                        player1.move_x = -0.25;
+                        attack = 1;
+                    }
 
 
                 }
-               
+
+
                 if (wolfdamage == false && Keyboard::isKeyPressed(Keyboard::X) && (pl.getGlobalBounds().intersects(wol.getGlobalBounds()))) {
                     wolfdamage = true;
                     keyPressed = false;
@@ -2739,7 +3210,7 @@ void Game_Play(RenderWindow& window)
                     wolfdamage = false;
                 }
 
-            
+
                 if (demonattacking && healthdemon != 0) {
 
                     auto currentTime = chrono::steady_clock::now();
@@ -2762,7 +3233,7 @@ void Game_Play(RenderWindow& window)
                 }
 
 
-              
+
 
                 if (wolfattacking1 && healthwolf2 != 0) {
                     auto currentTime = chrono::steady_clock::now();
@@ -2782,7 +3253,7 @@ void Game_Play(RenderWindow& window)
                     }
 
                 }
-               
+
 
                 // handle enemies collision
                 if (healthwolf == 0) {
@@ -2801,7 +3272,7 @@ void Game_Play(RenderWindow& window)
                     auto currentTime = chrono::steady_clock::now();
                     auto timeSinceLastCollision = currentTime - demontime.time;
 
-                    
+
                     if (timeSinceLastCollision >= delayDuration) {
                         health -= 2;
 
@@ -2823,7 +3294,7 @@ void Game_Play(RenderWindow& window)
                         healthcent--;
                 }
                 if (healthdemon == 0) {
-                   
+
                     demonspeed = 0;
                     demon.spritee.setPosition(8000.f, 8000.f);
                 }
@@ -2832,7 +3303,7 @@ void Game_Play(RenderWindow& window)
                     enemyHealth["demonh"] = 1;
                 }
                 if (healthmud == 0) {
-                   
+
 
 
                     mud.spritee.setPosition(8000.f, 8000.f);
@@ -2847,7 +3318,7 @@ void Game_Play(RenderWindow& window)
                     wolf2.spritee.setTexture(wolfattack1texture);
 
                 }
-               
+
                 if (wolfhurting == true) {
                     wolf2.spritee.setTexture(wolfhurttexture);
                     wolf2.spritee.setTextureRect(rectsourcewolfhurt);
@@ -2858,10 +3329,10 @@ void Game_Play(RenderWindow& window)
                     wolf2.spritee.setTextureRect(rectsourcewolfdead);
                 }
                 if (healthcent == 0) {
-                   
+
                     centspeed = 0;
                     centipede.spritee.setPosition(8000.f, 8000.f);
-                   
+
                 }
                 if (healthcent == 0 && enemyHealth["cent1h"] == 0) {
                     enemySound.play();
@@ -2939,89 +3410,89 @@ void Game_Play(RenderWindow& window)
                 }
 
                 else {
-                 
-                        if (!level3Completed) {
-                            for (int i = 0; i < 9; i++) {
-                                if (isColliding(rec, ob3[i])) {
 
-                                    player1.move_x = 0;
-                                }
-                            }
-                            if (continueanimation == true)
+                    if (!level3Completed) {
+                        for (int i = 0; i < 9; i++) {
+                            if (isColliding(rec, ob3[i])) {
 
-                            {
-
-
-                                if (clockenemy.getElapsedTime().asSeconds() > 0.1f) {
-
-                                    rectsourcecentwalk.left += 72;
-                                    if (rectsourcecentwalk.left >= 288)
-                                        rectsourcecentwalk.left = 0;
-
-                                    rectsourcecentattack.left += 72;
-                                    if (rectsourcecentattack.left >= 432)
-                                        rectsourcecentattack.left = 0;
-
-                                    rectsourcecenthurt.left += 72;
-                                    if (rectsourcecenthurt.left >= 144)
-                                        rectsourcecenthurt.left = 0;
-
-                                    rectsourcecentdead.left += 72;
-                                    if (rectsourcecentdead.left >= 144) {
-
-                                        rectsourcecentdead.left = 144;
-                                    }
-                                    rectmud.left += 62;
-                                    if (rectmud.left >= 495)
-
-                                        rectmud.left = 0;
-
-
-                                    rectmudhurt.left += 62;
-                                    if (rectmudhurt.left >= 248)
-                                        rectmudhurt.left = 0;
-                                    if (mudd == true) {
-                                        mud.spritee.setTexture(mudtext);
-                                        mud.spritee.setTextureRect(rectmud);
-                                    }
-                                    if (wolfdamage == true && mudhurt == true) {
-                                        mud.spritee.setTexture(mudtexthurt);
-                                        mud.spritee.setTextureRect(rectmudhurt);
-                                    }
-
-
-
-                                    clockenemy.restart();
-                                }  
-
-                            } if (centwalking == true) {
-                                centipede.spritee.setTexture(Centipedewalktexture);
-                                centipede.spritee.setTextureRect(rectsourcecentwalk);
-                            }
-
-                            if (centattacking == true) {
-                                centipede.spritee.setTexture(Centipedeattacktexture);
-                                centipede.spritee.setTextureRect(rectsourcecentattack);
-                            }
-                            if (wolfdamage == true) {
-                                centipede.spritee.setTexture(Centipedehurttexture);
-                                centipede.spritee.setTextureRect(rectsourcecenthurt);
-                            }
-                            if (healthcent == 0) {
-                                centipede.spritee.setTexture(Centipededeadtexture);
-                                centipede.spritee.setTextureRect(rectsourcecentdead);
-                            }
-
-                            for (int i = 0; i < 9; i++) {
-                                if (isColliding(rec, ob4[i])) {
-                                    if (i == 5) {
-                                        continue;
-                                    }
-                                    player1.move_x = 0;
-                                }
+                                player1.move_x = 0;
                             }
                         }
-                    
+                        if (continueanimation == true)
+
+                        {
+
+
+                            if (clockenemy.getElapsedTime().asSeconds() > 0.1f) {
+
+                                rectsourcecentwalk.left += 72;
+                                if (rectsourcecentwalk.left >= 288)
+                                    rectsourcecentwalk.left = 0;
+
+                                rectsourcecentattack.left += 72;
+                                if (rectsourcecentattack.left >= 432)
+                                    rectsourcecentattack.left = 0;
+
+                                rectsourcecenthurt.left += 72;
+                                if (rectsourcecenthurt.left >= 144)
+                                    rectsourcecenthurt.left = 0;
+
+                                rectsourcecentdead.left += 72;
+                                if (rectsourcecentdead.left >= 144) {
+
+                                    rectsourcecentdead.left = 144;
+                                }
+                                rectmud.left += 62;
+                                if (rectmud.left >= 495)
+
+                                    rectmud.left = 0;
+
+
+                                rectmudhurt.left += 62;
+                                if (rectmudhurt.left >= 248)
+                                    rectmudhurt.left = 0;
+                                if (mudd == true) {
+                                    mud.spritee.setTexture(mudtext);
+                                    mud.spritee.setTextureRect(rectmud);
+                                }
+                                if (wolfdamage == true && mudhurt == true) {
+                                    mud.spritee.setTexture(mudtexthurt);
+                                    mud.spritee.setTextureRect(rectmudhurt);
+                                }
+
+
+
+                                clockenemy.restart();
+                            }
+
+                        } if (centwalking == true) {
+                            centipede.spritee.setTexture(Centipedewalktexture);
+                            centipede.spritee.setTextureRect(rectsourcecentwalk);
+                        }
+
+                        if (centattacking == true) {
+                            centipede.spritee.setTexture(Centipedeattacktexture);
+                            centipede.spritee.setTextureRect(rectsourcecentattack);
+                        }
+                        if (wolfdamage == true) {
+                            centipede.spritee.setTexture(Centipedehurttexture);
+                            centipede.spritee.setTextureRect(rectsourcecenthurt);
+                        }
+                        if (healthcent == 0) {
+                            centipede.spritee.setTexture(Centipededeadtexture);
+                            centipede.spritee.setTextureRect(rectsourcecentdead);
+                        }
+
+                        for (int i = 0; i < 9; i++) {
+                            if (isColliding(rec, ob4[i])) {
+                                if (i == 5) {
+                                    continue;
+                                }
+                                player1.move_x = 0;
+                            }
+                        }
+                    }
+
 
                     else {
 
@@ -3115,9 +3586,9 @@ void Game_Play(RenderWindow& window)
                             }
 
                         }
-                       
+
                         if (healthcent2 == 0) {
-                           
+
                             centspeed2 = 0;
                             centipede2.spritee.setPosition(8000.f, 8000.f);
 
@@ -3126,10 +3597,10 @@ void Game_Play(RenderWindow& window)
                         if (healthcent2 == 0 && enemyHealth["cent2h"] == 0) {
                             enemySound.play();
                             enemyHealth["cent2h"] = 1;
-                        }  
-                        
-                      
-                        
+                        }
+
+
+
                         if ((pl.getGlobalBounds().intersects(mud.spritee.getGlobalBounds()) && healthmud != 0)) {
 
                             auto currentTime = chrono::steady_clock::now();
@@ -3192,21 +3663,21 @@ void Game_Play(RenderWindow& window)
                             bossBattleSound.stop();
                             win = 1;
                             gameisov = 1;
-                       
+
                         }
-                       
+
                     }
                 }
 
-            
+
 
 
                 Event::Resized;
                 resizedview(window, cam);
-               
+
                 if (timer2 > 2.0) {
-                        showLetter = true; // Set showLetter to true to display the letter
-                    
+                    showLetter = true; // Set showLetter to true to display the letter
+
                 }
 
 
@@ -3220,7 +3691,7 @@ void Game_Play(RenderWindow& window)
                 else if (player1.sprite.getPosition().x < cam.getCenter().x - 600) {
                     cam.move(-5, 0); // Move the view to the left
                 }
-           
+
 
                 if (attack) {
                     player1.update(timer, 3);
@@ -3258,27 +3729,37 @@ void Game_Play(RenderWindow& window)
                 window.draw(hpp);
                 window.draw(demon.spritee);
                 window.draw(waechter.spritee);
-                window.draw(necklaceSprite);
-                necklaceSprite.rotate(3.f);
-                window.draw(arrowSprite);
-                arrowSprite.rotate(3.f);
-                window.draw(ballonSprite);
-                ballonSprite.rotate(3.f);
-                window.draw(fireSprite);
-                fireSprite.rotate(3.f);
-                window.draw(tool2Sprite);
-                tool2Sprite.rotate(3.f);
-                window.draw(diamondSprite);
-                diamondSprite.rotate(3.f);
-                window.draw(keySprite);
-                keySprite.rotate(3.f);
-                window.draw(torchSprite);
-                torchSprite.rotate(3.f);
+                if (necklace) {
+                    window.draw(necklaceSprite);
+                    necklaceSprite.rotate(3.f);
+                }if (arrow) {
+                    window.draw(arrowSprite);
+                    arrowSprite.rotate(3.f);
+                }if (ballon) {
+                    window.draw(ballonSprite);
+                    ballonSprite.rotate(3.f);
+                }if (fire) {
+                    window.draw(fireSprite);
+                    fireSprite.rotate(3.f);
+                }if (tool2) {
+
+
+                    window.draw(tool2Sprite);
+                    tool2Sprite.rotate(3.f);
+                }if (diamond) {
+                    window.draw(diamondSprite);
+                    diamondSprite.rotate(3.f);
+                }if (tool1) {
+                    window.draw(keySprite);
+                    keySprite.rotate(3.f);
+                }if (torch) {
+                    window.draw(torchSprite);
+                    torchSprite.rotate(3.f);
+                }
 
 
 
 
-              
                 pl.setPosition(player1.sprite.getPosition().x + 80.f, player1.sprite.getPosition().y + 80.f);
                 float width = 50.f;
                 float height = 100.f;
@@ -3290,10 +3771,10 @@ void Game_Play(RenderWindow& window)
                 dem.setSize(Vector2f(100, 140));
                 cen.setSize(Vector2f(100, 80));
                 wol.setSize(Vector2f(120, 140));
-            
+
                 window.draw(player1.sprite);
                 window.draw(letterSprite);
-       
+
 
                 if (player1.sprite.getGlobalBounds().intersects(rectangle.getGlobalBounds())) {
 
@@ -3322,13 +3803,15 @@ void Game_Play(RenderWindow& window)
                     window.draw(enemy2.sprite);
                     window.draw(enemy4.sprite);
                     window.draw(enemy5.sprite);
-              
+
 
                     enemy1.update_enemy(htimer, enemy1.attack, Enemyattack, enemy1.dead, Enemydeath);
                     enemy2.update_enemy(htimer, enemy2.attack, Enemyattack, enemy2.dead, Enemydeath);
                     enemy4.update_enemy(htimer, enemy4.attack, Enemyattack, enemy4.dead, Enemydeath);
                     enemy5.update_enemy(htimer, enemy5.attack, Enemyattack, enemy5.dead, Enemydeath);
-                   
+
+
+
                 }
 
                 else {
@@ -3353,7 +3836,7 @@ void Game_Play(RenderWindow& window)
                         window.draw(wolf2.spritee);
                         window.draw(centipede.spritee);
 
-                     
+
                     }
                     else {
                         for (int i = 0; i < 9; i++) {
@@ -3363,6 +3846,18 @@ void Game_Play(RenderWindow& window)
                         enemy10.update_enemy(htimer, enemy10.attack, Enemyattack, enemy10.dead, Enemydeath);
                         window.draw(enemy11.sprite);
                         enemy11.update_enemy(htimer, enemy11.attack, Enemyattack, enemy11.dead, Enemydeath);
+                        window.draw(enemy12.sprite);
+                        enemy12.update_enemy(htimer, enemy12.attack, Enemyattack, enemy12.dead, Enemydeath);
+                        window.draw(enemy13.sprite);
+                        enemy13.update_enemy(htimer, enemy13.attack, Enemyattack, enemy13.dead, Enemydeath);
+
+                        window.draw(enemy3.sprite);
+                        //window.draw(b);
+                        enemy3.update_enemy3(htimer, enemy3.attack, Enemy3photo, attack_textures, enemy3.dead, Enemy3death, enemy3.stunned, enemy3stunned);
+                        window.draw(enemy14.sprite);
+                        //window.draw(b2);
+                        enemy14.update_enemy3(htimer, enemy14.attack, Enemy3photo, attack_textures, enemy14.dead, Enemy3death, enemy14.stunned, enemy3stunned);
+
 
                         window.draw(mud.spritee);
                         window.draw(wolf.spritee);
@@ -3411,12 +3906,19 @@ void Game_Play(RenderWindow& window)
         }
         else
         {
-            
+
             if (win) {
                 healthwolf = 35;
                 healthwolf2 = 25;
                 healthcent = 20;
                 healthcent2 = 20;
+                necklace = 1;
+                ballon = 1;
+                arrow = 1;
+                torch = 1;
+                tool2 = 1;
+                diamond = 1; fire = 1; tool1 = 1;
+
 
                 healthmud = 15;
                 healthdemon = 25;
@@ -3458,7 +3960,7 @@ void Game_Play(RenderWindow& window)
                 titleText.setPosition(Vector2f(splashScreen.getPosition().x + splashScreen.getGlobalBounds().width / 3.7f, splashScreen.getPosition().y + 150));
                 press.setPosition(Vector2f(splashScreen.getPosition().x + splashScreen.getGlobalBounds().width / 3.7f, splashScreen.getPosition().y + 350));
                 press.setPosition(Vector2f(splashScreen.getPosition().x + splashScreen.getGlobalBounds().width / 3.7f, splashScreen.getPosition().y + 480));
-           
+
 
                 // Draw the splash screen elements
                 sound3.play();
@@ -3480,7 +3982,8 @@ void Game_Play(RenderWindow& window)
                 if (spacePressed) Game_Play(window);
             }
             else {
-               
+                bossBattleSound.stop();
+
                 Vector2f mousePosition = window.mapPixelToCoords(Mouse::getPosition(window));
                 bool isMousePressed = Mouse::isButtonPressed(Mouse::Left);
 
@@ -3503,7 +4006,13 @@ void Game_Play(RenderWindow& window)
                     healthwolf2 = 25;
                     healthcent = 20;
                     healthcent2 = 20;
-
+                    necklace = 1;
+                    ballon = 1;
+                    arrow = 1;
+                    torch = 1;
+                    tool2 = 1;
+                    diamond = 1; fire = 1; tool1 = 1;
+                    specialswitch = false;
                     healthmud = 15;
                     healthdemon = 25;
                     gameisov = false; // Resume the game
@@ -3530,4 +4039,4 @@ void Game_Play(RenderWindow& window)
         }
 
     }
-}
+    }
